@@ -20,15 +20,29 @@
                     <input name="version" type="text" required placeholder="1.20.4" pattern="^(1|26)\.\d+(\.\d+)?$">
                 </label>
 
-                <label class="form-field form-field-wide select-field" for="software">
-                    <span>Software del servidor</span>
-                    <select name="software" id="software" required>
-                        <option value="" selected disabled>Selecciona uno</option>
-                        <option value="vanilla" disabled>Vanilla</option>
-                        <option value="paper">Paper</option>
-                        <option value="spigot" disabled>Spigot</option>
-                        <option value="fabric" disabled>Fabric</option>
-                    </select>
+                <label class="form-field form-field-wide select-field" for="software-trigger">
+                    <span id="software-label">Software del servidor</span>
+                    <div class="custom-select" data-custom-select>
+                        <button
+                            id="software-trigger"
+                            class="custom-select-trigger"
+                            type="button"
+                            aria-haspopup="listbox"
+                            aria-expanded="false"
+                            aria-controls="software-listbox"
+                            aria-labelledby="software-label software-value"
+                        >
+                            <span id="software-value" class="custom-select-value is-placeholder">Selecciona uno</span>
+                        </button>
+
+                        <ul id="software-listbox" class="custom-select-list" role="listbox" tabindex="-1" hidden>
+                            <li id="software-option-vanilla" class="custom-select-option is-disabled" role="option" data-value="vanilla" aria-disabled="true">Vanilla</li>
+                            <li id="software-option-paper" class="custom-select-option" role="option" data-value="paper">Paper</li>
+                            <li id="software-option-spigot" class="custom-select-option is-disabled" role="option" data-value="spigot" aria-disabled="true">Spigot</li>
+                            <li id="software-option-fabric" class="custom-select-option is-disabled" role="option" data-value="fabric" aria-disabled="true">Fabric</li>
+                        </ul>
+                    </div>
+                    <input type="hidden" name="software" id="software" value="">
                 </label>
             </div>
 

@@ -1,11 +1,199 @@
-document.getElementById('create-server-form').addEventListener('submit', async (e) => {
+const form = document.getElementById('create-server-form');
+const hiddenSoftware = document.getElementById('software');
+const customSelect = document.querySelector('[data-custom-select]');
+const trigger = document.getElementById('software-trigger');
+const valueNode = document.getElementById('software-value');
+const listbox = document.getElementById('software-listbox');
+const options = Array.from(listbox.querySelectorAll('.custom-select-option'));
+
+let isOpen = false;
+let activeIndex = -1;
+let selectedIndex = -1;
+
+const isOptionDisabled = (option) => option.classList.contains('is-disabled') || option.getAttribute('aria-disabled') === 'true';
+const firstEnabledIndex = () => options.findIndex((option) => !isOptionDisabled(option));
+
+const setActiveIndex = (index) => {
+  options.forEach((option, i) => {
+    option.classList.toggle('is-active', i === index);
+  });
+
+  activeIndex = index;
+  if (activeIndex >= 0) {
+    trigger.setAttribute('aria-activedescendant', options[activeIndex].id);
+    options[activeIndex].scrollIntoView({ block: 'nearest' });
+  } else {
+    trigger.removeAttribute('aria-activedescendant');
+  }
+};
+
+const moveActive = (direction) => {
+  if (!options.length) {
+    return;
+  }
+
+  let index = activeIndex;
+  if (index < 0) {
+    index = selectedIndex >= 0 ? selectedIndex : firstEnabledIndex();
+  }
+
+  for (let i = 0; i < options.length; i += 1) {
+    index = (index + direction + options.length) % options.length;
+    if (!isOptionDisabled(options[index])) {
+      setActiveIndex(index);
+      return;
+    }
+  }
+};
+
+const closeSelect = ({ restoreFocus = false } = {}) => {
+  if (!isOpen) {
+    return;
+  }
+
+  isOpen = false;
+  customSelect.classList.remove('is-open');
+  listbox.hidden = true;
+  trigger.setAttribute('aria-expanded', 'false');
+  if (restoreFocus) {
+    trigger.focus();
+  }
+};
+
+const openSelect = () => {
+  if (isOpen) {
+    return;
+  }
+
+  isOpen = true;
+  customSelect.classList.add('is-open');
+  listbox.hidden = false;
+  trigger.setAttribute('aria-expanded', 'true');
+
+  const fallback = selectedIndex >= 0 ? selectedIndex : firstEnabledIndex();
+  setActiveIndex(fallback);
+};
+
+const selectIndex = (index) => {
+  if (index < 0 || index >= options.length || isOptionDisabled(options[index])) {
+    return;
+  }
+
+  selectedIndex = index;
+  const option = options[index];
+  const value = option.dataset.value || '';
+
+  options.forEach((item, i) => {
+    const selected = i === index;
+    item.classList.toggle('is-selected', selected);
+    item.setAttribute('aria-selected', selected ? 'true' : 'false');
+  });
+
+  hiddenSoftware.value = value;
+  valueNode.textContent = option.textContent;
+  valueNode.classList.remove('is-placeholder');
+  hiddenSoftware.setCustomValidity('');
+};
+
+trigger.addEventListener('click', () => {
+  if (isOpen) {
+    closeSelect();
+  } else {
+    openSelect();
+  }
+});
+
+trigger.addEventListener('keydown', (event) => {
+  switch (event.key) {
+    case 'ArrowDown':
+      event.preventDefault();
+      if (!isOpen) {
+        openSelect();
+      }
+      moveActive(1);
+      break;
+    case 'ArrowUp':
+      event.preventDefault();
+      if (!isOpen) {
+        openSelect();
+      }
+      moveActive(-1);
+      break;
+    case 'Enter':
+    case ' ':
+      event.preventDefault();
+      if (!isOpen) {
+        openSelect();
+      } else if (activeIndex >= 0) {
+        selectIndex(activeIndex);
+        closeSelect({ restoreFocus: true });
+      }
+      break;
+    case 'Escape':
+      if (isOpen) {
+        event.preventDefault();
+        closeSelect({ restoreFocus: true });
+      }
+      break;
+    case 'Tab':
+      closeSelect();
+      break;
+    default:
+      break;
+  }
+});
+
+listbox.addEventListener('click', (event) => {
+  const option = event.target.closest('.custom-select-option');
+  if (!option || isOptionDisabled(option)) {
+    return;
+  }
+
+  const index = options.indexOf(option);
+  selectIndex(index);
+  setActiveIndex(index);
+  closeSelect({ restoreFocus: true });
+});
+
+listbox.addEventListener('mousemove', (event) => {
+  const option = event.target.closest('.custom-select-option');
+  if (!option || isOptionDisabled(option)) {
+    return;
+  }
+
+  const index = options.indexOf(option);
+  if (index !== activeIndex) {
+    setActiveIndex(index);
+  }
+});
+
+document.addEventListener('mousedown', (event) => {
+  if (!customSelect.contains(event.target)) {
+    closeSelect();
+  }
+});
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') {
+    closeSelect({ restoreFocus: true });
+  }
+});
+
+form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  const form = e.currentTarget;
+  if (!hiddenSoftware.value) {
+    hiddenSoftware.setCustomValidity('Selecciona un software para continuar.');
+    hiddenSoftware.reportValidity();
+    openSelect();
+    return;
+  }
+
+  const currentForm = e.currentTarget;
   const data = {
-    name: form.name.value.trim(),
-    version: form.version.value.trim(),
-    software: form.software.value
+    name: currentForm.name.value.trim(),
+    version: currentForm.version.value.trim(),
+    software: currentForm.software.value
   };
 
   try {
