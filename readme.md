@@ -1,6 +1,6 @@
 # ⛏️ Minecraft Server Dashboard
 
-A lightweight desktop script designed to manage, host, and monitor local Minecraft servers effortlessly. Built with Python, Flask, WebSockets, and a web-based dashboard interface.
+An in-development lightweight desktop script designed to manage, host, and monitor local Minecraft servers effortlessly. Built with Python, Flask, WebSockets, and a web-based dashboard interface.
 
 ---
 
@@ -16,7 +16,7 @@ A lightweight desktop script designed to manage, host, and monitor local Minecra
 
 ## 🛠️ Tech Stack
 
-- **Backend:** Python 3.x, Flask, Flask-SocketIO, `subprocess`, `psutil`
+- **Backend:** Python 3.x, Flask, Flask-SocketIO, `subprocess`
 - **Frontend:** HTML5, CSS3, JavaScript (Socket.IO client)
 - **External APIs:** PaperMC API, CurseForge API (for mod discovery and updates), Playit.gg CLI
 
@@ -37,7 +37,7 @@ A lightweight desktop script designed to manage, host, and monitor local Minecra
    cd nombre-de-tu-repo
    ```
 
-2. **Install dependencies**
+2. **Install dependencies** NOT WORKING YET
     ```bash
     pip install -r requirements.txt
     ```
