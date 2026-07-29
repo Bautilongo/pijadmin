@@ -10,35 +10,35 @@ BASE_DIR = UTIL_DIR.parent
 SERVERS_DIR = BASE_DIR / 'servers'
 jar_path = SERVERS_DIR / 'server.jar'
 
-def ensure():
-    data = {}
-    with open(UTIL_DIR / 'conf.json', 'a+', encoding='utf-8') as f:
-        f.seek(0)
-        if f.read().strip():
-            f.seek(0)
-            data = json.load(f)
+# def ensure():
+#     data = {}
+#     with open(UTIL_DIR / 'conf.json', 'a+', encoding='utf-8') as f:
+#         f.seek(0)
+#         if f.read().strip():
+#             f.seek(0)
+#             data = json.load(f)
 
-    # Si no hay una version en el .json...
-    if not data:
-        version = ask_for_version()
-        download(get_lastest_build(version, download=True), jar_path)
-        with open(UTIL_DIR / 'conf.json', 'w', encoding='utf-8') as f:
-            json.dump({'version': version}, f, indent=4)
-        return
+#     # Si no hay una version en el .json...
+#     if not data:
+#         version = ask_for_version()
+#         download(get_lastest_build(version, download=True), jar_path)
+#         with open(UTIL_DIR / 'conf.json', 'w', encoding='utf-8') as f:
+#             json.dump({'version': version}, f, indent=4)
+#         return
 
-    version = data['version']
+#     version = data['version']
 
-    # Si no hay archivo pero sí version especificada...
-    if not jar_path.exists():
-        version = version
-        download(get_lastest_build(version, download=True), jar_path)
-        return
+#     # Si no hay archivo pero sí version especificada...
+#     if not jar_path.exists():
+#         version = version
+#         download(get_lastest_build(version, download=True), jar_path)
+#         return
 
-    # Si el sha256 del archivo no coincide con el esperado...
-    expected_checksum = get_lastest_build(version).json()['downloads']['server:default']['checksums']['sha256']
-    if not check_sha256(jar_path, expected_checksum):
-        download(get_lastest_build(version, download=True), jar_path)
-        return
+#     # Si el sha256 del archivo no coincide con el esperado...
+#     expected_checksum = get_lastest_build(version).json()['downloads']['server:default']['checksums']['sha256']
+#     if not check_sha256(jar_path, expected_checksum):
+#         download(get_lastest_build(version, download=True), jar_path)
+#         return
 
 # Aceptar el eula automáticamente
 def eula():
@@ -52,31 +52,37 @@ def ask_for_version():
             continue
         return version
 
-def check_sha256(path: Path, expected: str) -> bool:
-    sha = hashlib.sha256()
+def check_sha1(path: Path, expected: str) -> bool:
+    with path.open('rb') as f:
+        digest = hashlib.file_digest(f, 'sha1')
+    return digest.hexdigest().lower() == expected.lower()
 
-    with path.open("rb") as f:
-        for block in iter(lambda: f.read(8192), b""):
-            sha.update(block)
+def get_version(v:str, *, download:bool=False):
+    url = f'https://launchermeta.mojang.com/mc/game/version_manifest.json'
+    r = requests.get(url).json()['versions']
 
-    return sha.hexdigest().lower() == expected.lower()
+    new_url = None
+    for version in r:
+        if version['id'] == v:
+            new_url = version['url']
 
+    if not new_url:
+        raise Exception('invalid version')
+    r = requests.get(new_url)
 
-def get_lastest_build(v:str, *, download:bool=False):
-    url = f'https://fill.papermc.io/v3/projects/paper/versions/{v}/builds/latest'
-    r = requests.get(url)
+    print(r.json())
 
     if not r.ok:
         if r.status_code == 502 or r.status_code == 500:
-            raise Exception('Paper servers unavailable')
+            raise Exception('Mojang servers unavailable')
         if r.status_code == 400 or r.status_code == 404:
             raise Exception('invalid version')
         else:
-            raise Exception(f'Paper servers responded with {r.status_code}')    
+            raise Exception(f'Mojang servers responded with {r.status_code}')
 
     r_json = r.json()
-    download_url = [r_json['downloads']['server:default']['url'], r_json['downloads']['server:default']['checksums']['sha256']]
-        
+    download_url = [r_json['downloads']['server']['url'], r_json['downloads']['server']['sha1']]
+
     if not download:
         return r
     return download_url
@@ -105,13 +111,13 @@ def create_server(name:str, version:str):
             target.parent.mkdir(parents=True)
         except FileExistsError:
             return 'Duplicated server name!'
-        r = get_lastest_build(version, download=True)
+        r = get_version(version, download=True)
         download(r[0], target) # type: ignore
-        if not check_sha256(target, r[1]): # type: ignore
+        if not check_sha1(target, r[1]): # type: ignore
             raise Exception('The downloaded server executable is invalid, corrupt or was modified, please try again')
     except Exception as e:
         target.unlink(missing_ok=True)
-        if target.parent.exists():
+        if target.parent.is_dir():
             target.parent.rmdir()
         print('error inesperado:', e)
         return str(e)

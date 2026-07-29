@@ -9,8 +9,9 @@ import configparser
 from configparser import ConfigParser
 import re
 
-from util import paper
 from util import util
+from util import paper
+from util import vanilla
 
 # from util.ensure import ensure, eula
 
@@ -129,7 +130,30 @@ def api_new_server():
         }, 400
 
     if software == 'vanilla':
-        pass
+        result = vanilla.create_server(name, version)
+        if result == 0:
+            return {
+                'ok': 'true',
+                'message': 'created'
+            }, 201
+        if 'duplicated' in result.lower():
+            return {
+                'ok': 'false',
+                'error': 'duplicated_name',
+                'message': "Server's name is duplicated!"
+            }, 409
+        if 'version' in result.lower():
+            return {
+                'ok': 'false',
+                'error': 'invalid_version',
+                'message': 'The passed version is invalid'
+            }, 400
+        else:
+            return {
+                'ok': 'false',
+                'error': 'unexpected_error',
+                'message': 'An unexpected error occured, try again later or contact a developer'
+            }, 500
 
     elif software == 'paper':
         result = paper.create_server(name, version)
@@ -150,6 +174,12 @@ def api_new_server():
                 'error': 'invalid_version',
                 'message': 'The passed version is invalid'
             }, 400
+        if 'mojang' in result.lower():
+            return {
+                'ok': 'false',
+                'error': 'mojang_error',
+                'message': 'Mojang servers are unavailable, try again later'
+            }, 502
         else:
             return {
                 'ok': 'false',
