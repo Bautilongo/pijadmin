@@ -65,6 +65,7 @@ def get_version(v:str, *, download:bool=False):
     for version in r:
         if version['id'] == v:
             new_url = version['url']
+            break
 
     if not new_url:
         raise Exception('invalid version')
