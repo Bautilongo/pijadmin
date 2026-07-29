@@ -37,7 +37,7 @@ An in-development lightweight desktop script designed to manage, host, and monit
    cd nombre-de-tu-repo
    ```
 
-2. **Install dependencies** NOT WORKING YET
+2. **Install dependencies** `NOT WORKING YET`
     ```bash
     pip install -r requirements.txt
     ```
