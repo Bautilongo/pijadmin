@@ -1,0 +1,29 @@
+{% extends "nav.html" %}
+{% block head %}
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+{% endblock %}
+{% block body %}
+    <main class="main-content">
+        <div class="card" id="panel-control">
+            <h2>Control del servidor</h2>
+            <button id="btnStart" onclick="iniciar()">Encender Servidor</button>
+            <span id="status">● Desconectado</span>
+            <span id="metrics">RAM: 0 MB | CPU: 0%</span>
+        </div>
+
+        <div class="card" id="panel-console">
+            <h2>Consola en vivo</h2>
+            <div id="console"> Esperando inicio del servidor...</div>
+            <br>
+            <input type="text" autocomplete="off" id="cmdInput" placeholder="Escribe un comando (ej: op TuNombre)" onkeydown="if(event.key==='Enter') enviarComando()">
+            <button onclick="enviarComando()">Enviar</button>
+        </div>
+    </main>
+
+    <dialog id="shut-down-modal">
+        <h2>Seguro de que quieres apagar el servidor?</h2>
+        <button id="modal-yes-button">Sí</button>
+        <button id="modal-no-button">No</button>
+    </dialog>
+<script src="{{ url_for('static', filename='js/console.js') }}"></script>
+{% endblock %}

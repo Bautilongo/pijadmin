@@ -1,0 +1,50 @@
+{% extends 'layout.html'%}
+
+{% block body %}
+<main class="main-content">
+    <div class="card new-server-card">
+        <div class="content-header">
+            <h1>Crear un nuevo servidor</h1>
+            <p>Configura el nombre, la versión y el software base antes de descargar los archivos.</p>
+        </div>
+
+        <form id="create-server-form" class="new-server-form">
+            <div class="form-grid">
+                <label class="form-field">
+                    <span>Nombre del servidor</span>
+                    <input name="name" type="text" required minlength="3" maxlength="20" pattern="^[A-Za-z0-9_-]{3,20}$" placeholder="mi-servidor" title="Usa 3 a 20 caracteres: letras, números, _ o -">
+                </label>
+
+                <label class="form-field">
+                    <span>Versión de Minecraft</span>
+                    <input name="version" type="text" required placeholder="1.20.4" pattern="^(1|26)\.\d+(\.\d+)?$">
+                </label>
+
+                <label class="form-field form-field-wide select-field" for="software">
+                    <span>Software del servidor</span>
+                    <select name="software" id="software" required>
+                        <option value="" selected disabled>Selecciona uno</option>
+                        <option value="vanilla" disabled>Vanilla</option>
+                        <option value="paper">Paper</option>
+                        <option value="spigot" disabled>Spigot</option>
+                        <option value="fabric" disabled>Fabric</option>
+                    </select>
+                </label>
+            </div>
+
+            <div class="form-actions">
+                <a class="btn btn-secondary" href="/">Cancelar</a>
+                <button class="btn btn-primary" type="submit">Crear servidor</button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<dialog id="error-modal">
+    <h2>No se pudo crear el servidor</h2>
+    <p id="error-modal-message">Ha ocurrido un error inesperado.</p>
+    <button class="btn btn-primary" id="error-modal-button" type="button">Continuar</button>
+</dialog>
+
+<script src="{{ url_for('static', filename='js/new_server.js') }}"></script>
+{% endblock %}

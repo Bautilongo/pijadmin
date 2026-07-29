@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<div class="main-content">
+    <div class="content-header">
+        <h1>Servidores</h1>
+    </div>
+
+    {% if servers %}
+    <div class="servers-grid">
+        {% for server in servers %}
+        <div class="server-card">
+            <div class="server-badge">
+                <h3>{{server.suffix.lstrip('.')}}</h3>
+            </div>
+            <div class="server-actions">
+                <button class="btn btn-sm btn-secondary">Configurar</button>
+                <button class="btn btn-sm btn-danger">Eliminar</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="action-bar">
+        <button class="btn btn-primary" onclick="serverCreate()">+ Nuevo Servidor</button>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <h2>¡Comienza tu primer servidor!</h2>
+        <p>Aún no has creado ningún servidor. Crea uno ahora para empezar.</p>
+        <a class="btn btn-primary btn-lg" href="/server/new">+ Crear Servidor</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
