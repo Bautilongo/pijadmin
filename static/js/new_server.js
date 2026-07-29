@@ -190,11 +190,19 @@ form.addEventListener('submit', async (e) => {
   }
 
   const currentForm = e.currentTarget;
+  let software = currentForm.software.value
+  if (software == 'spigot') {
+    const modal = document.getElementById('error-modal');
+    document.getElementById('error-modal-message').innerText = 'No se puede usar spigot: es malísimo!';
+    modal.showModal();
+    return;
+  }
   const data = {
     name: currentForm.name.value.trim(),
     version: currentForm.version.value.trim(),
-    software: currentForm.software.value
+    software: software
   };
+  console.log(data)
 
   try {
     const res = await fetch('/api/servers/new', {
