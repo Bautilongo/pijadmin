@@ -26,7 +26,7 @@ An in-development lightweight desktop script designed to manage, host, and monit
 
 ### Prerequisites
 
-- Python 3.9+ installed on your system.
+- Python 3.12+ installed on your system.
 - Java 17 or higher (required to run modern Minecraft server builds).
 
 ### Installation
