@@ -75,7 +75,7 @@ def get_lastest_build(v:str, *, download:bool=False):
             raise Exception(f'Paper servers responded with {r.status_code}')    
 
     r_json = r.json()
-    download_url = [r_json['downloads']['server:default']['url'], r_json['downloads']['server:default']['checksums']['sha256']]
+    download_url = [r_json['downloads']['server:default']['url'], r_json['downloads']['server:default']['checksums']['sha256'], r_json['id']]
         
     if not download:
         return r
@@ -115,4 +115,4 @@ def create_server(name:str, version:str):
             target.parent.rmdir()
         print('error inesperado:', e)
         return str(e)
-    return 0
+    return [r[1], int(r[2])] # type: ignore

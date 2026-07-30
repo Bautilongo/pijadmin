@@ -122,4 +122,4 @@ def create_server(name:str, version:str):
             target.parent.rmdir()
         print('error inesperado:', e)
         return str(e)
-    return 0
+    return r[1] # type: ignore

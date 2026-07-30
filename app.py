@@ -83,7 +83,10 @@ def get_server_by_name(name: str):
     if not dir.is_dir():
         return None
     config.read(dir / '.conf')
-    return dir
+    software = config['server']['software']
+    version = config['server']['version']
+    build = config['server']['build']
+    return [software, version, build]
 
 @app.route('/')
 def index():
@@ -126,8 +129,8 @@ def api_new_server():
 
     if software == 'vanilla':
         result = vanilla.create_server(name, version)
-        if result == 0:
-            util.create_conf_file(name, version)
+        if len(result) == 40:
+            util.create_conf_file(name, version, software='vanilla', sha=result, build_id=0)
             return {
                 'ok': 'true',
                 'message': 'created'
@@ -159,25 +162,25 @@ def api_new_server():
 
     elif software == 'paper':
         result = paper.create_server(name, version)
-        if result == 0:
-            util.create_conf_file(name, version)
+        if len(result[0]) == 64:
+            util.create_conf_file(name, version, software='paper', sha=result[0], build_id=result[1]) # type: ignore
             return {
                 'ok': 'true',
                 'message': 'created'
             }, 201
-        if 'duplicated' in result.lower():
+        if 'duplicated' in result.lower(): # type: ignore
             return {
                 'ok': 'false',
                 'error': 'duplicated_name',
                 'message': "Server's name is duplicated!"
             }, 409
-        if 'version' in result.lower():
+        if 'version' in result.lower(): # type: ignore
             return {
                 'ok': 'false',
                 'error': 'invalid_version',
                 'message': 'The passed version is invalid'
             }, 400
-        if 'paper' in result.lower():
+        if 'paper' in result.lower(): # type: ignore
             return {
                 'ok': 'false',
                 'error': 'paper_error',
@@ -207,8 +210,10 @@ def api_new_server():
 
 @app.route('/server/<server_name>')
 def server(server_name):
-    if get_server_by_name(server_name)
-    return render_template('server.html', server=server)
+    server = get_server_by_name(server_name)
+    if not server:
+        return 
+    return render_template('server.html', server=server), 404
 
 def emitir_a_clientes(evento, data):
     with clients_lock:
