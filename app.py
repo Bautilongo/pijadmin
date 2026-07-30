@@ -5,12 +5,14 @@ import psutil
 from pathlib import Path
 from typing import Optional
 from threading import Lock
-import configparser
+from configparser import ConfigParser
 import re
 
 from util import util
 from util import paper
 from util import vanilla
+
+config = ConfigParser()
 
 # from util.ensure import ensure, eula
 
@@ -76,16 +78,16 @@ def search_servers():
         servers.append(item)
     return servers if servers else None
 
-def search_server_by_name(name: str):
+def get_server_by_name(name: str):
     dir = SERVERS_DIR / ('server.' + name)
     if not dir.is_dir():
         return None
+    config.read(dir / '.conf')
     return dir
 
 @app.route('/')
 def index():
     servers = search_servers()
-    print(servers)
     return render_template('index.html', servers=servers)
 
 
@@ -205,7 +207,8 @@ def api_new_server():
 
 @app.route('/server/<server_name>')
 def server(server_name):
-    return render_template('server.html', server_name=server_name)
+    if get_server_by_name(server_name)
+    return render_template('server.html', server=server)
 
 def emitir_a_clientes(evento, data):
     with clients_lock:
