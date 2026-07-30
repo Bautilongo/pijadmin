@@ -202,7 +202,6 @@ form.addEventListener('submit', async (e) => {
     version: currentForm.version.value.trim(),
     software: software
   };
-  console.log(data)
 
   try {
     const res = await fetch('/api/servers/new', {
@@ -219,7 +218,7 @@ form.addEventListener('submit', async (e) => {
       return;
     }
 
-    window.location.href = '/servers';
+    window.location.href = `/server/${currentForm.name.value.trim()}`;
   } catch (err) {
     const modal = document.getElementById('error-modal');
     document.getElementById('error-modal-message').innerText = 'No se pudo contactar con el servidor. Revisa la conexión e inténtalo de nuevo.';

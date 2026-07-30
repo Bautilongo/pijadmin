@@ -4,7 +4,7 @@
 {% endblock %}
 {% block body %}
     <main class="main-content">
-        <div class="card" id="panel-control">
+        <div class="card" id="panel-control" data-server="{{ server_name }}">
             <h2>Control del servidor</h2>
             <button id="btnStart" onclick="iniciar()">Encender Servidor</button>
             <span id="status">● Desconectado</span>
@@ -13,9 +13,9 @@
 
         <div class="card section" id="panel-main">
             <h2>Opciones</h2>
-            <p>version 1.21.1</p>
+            <p>version {{server['version']}}</p>
             <button>cambiar</button>
-            <p>nombre asdasdadad</p>
+            <p>nombre</p>
             <button>cambiar</button>
         </div>
 

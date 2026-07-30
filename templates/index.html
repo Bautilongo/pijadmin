@@ -9,13 +9,13 @@
     {% if servers %}
     <div class="servers-grid">
         {% for server in servers %}
-        <div class="server-card">
+        <div class="server-card" id="server-{{server.suffix.lstrip('.')}}">
             <div class="server-badge">
                 <h3>{{server.suffix.lstrip('.')}}</h3>
             </div>
             <div class="server-actions">
                 <button class="btn btn-sm btn-secondary" id="configure-button" data-server="{{server.suffix.lstrip('.')}}" onclick="configure(this)">Configurar</button>
-                <button class="btn btn-sm btn-danger">Eliminar</button>
+                <button class="btn btn-sm btn-danger" id="delete-button" data-server="{{server.suffix.lstrip('.')}}" onclick="confirmDel(this)">Eliminar</button>
             </div>
         </div>
         {% endfor %}
@@ -31,5 +31,11 @@
     </div>
     {% endif %}
 </div>
+
+<dialog id="confirmation-modal">
+    <h2>Seguro de que querés eliminar este servidor?</h2>
+    <button class="btn btn-danger" id="delete-modal-button" onclick="del(this)">Sí</button>
+    <button class="btn btn-secondary" id="cancel-modal-button" type="button">Cancelar</button>
+</dialog>
 <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 {% endblock %}

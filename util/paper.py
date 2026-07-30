@@ -10,35 +10,35 @@ BASE_DIR = UTIL_DIR.parent
 SERVERS_DIR = BASE_DIR / 'servers'
 jar_path = SERVERS_DIR / 'server.jar'
 
-def ensure():
-    data = {}
-    with open(UTIL_DIR / 'conf.json', 'a+', encoding='utf-8') as f:
-        f.seek(0)
-        if f.read().strip():
-            f.seek(0)
-            data = json.load(f)
+# def ensure():
+#     data = {}
+#     with open(UTIL_DIR / 'conf.json', 'a+', encoding='utf-8') as f:
+#         f.seek(0)
+#         if f.read().strip():
+#             f.seek(0)
+#             data = json.load(f)
 
-    # Si no hay una version en el .json...
-    if not data:
-        version = ask_for_version()
-        download(get_lastest_build(version, download=True), jar_path)
-        with open(UTIL_DIR / 'conf.json', 'w', encoding='utf-8') as f:
-            json.dump({'version': version}, f, indent=4)
-        return
+#     # Si no hay una version en el .json...
+#     if not data:
+#         version = ask_for_version()
+#         download(get_lastest_build(version, download=True), jar_path)
+#         with open(UTIL_DIR / 'conf.json', 'w', encoding='utf-8') as f:
+#             json.dump({'version': version}, f, indent=4)
+#         return
 
-    version = data['version']
+#     version = data['version']
 
-    # Si no hay archivo pero sí version especificada...
-    if not jar_path.exists():
-        version = version
-        download(get_lastest_build(version, download=True), jar_path)
-        return
+#     # Si no hay archivo pero sí version especificada...
+#     if not jar_path.exists():
+#         version = version
+#         download(get_lastest_build(version, download=True), jar_path)
+#         return
 
-    # Si el sha256 del archivo no coincide con el esperado...
-    expected_checksum = get_lastest_build(version).json()['downloads']['server:default']['checksums']['sha256']
-    if not check_sha256(jar_path, expected_checksum):
-        download(get_lastest_build(version, download=True), jar_path)
-        return
+#     # Si el sha256 del archivo no coincide con el esperado...
+#     expected_checksum = get_lastest_build(version).json()['downloads']['server:default']['checksums']['sha256']
+#     if not check_sha256(jar_path, expected_checksum):
+#         download(get_lastest_build(version, download=True), jar_path)
+#         return
 
 # Aceptar el eula automáticamente
 def eula():

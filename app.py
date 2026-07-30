@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, url_for, redirect
 from flask_socketio import SocketIO
 import subprocess
 import psutil
@@ -23,7 +23,6 @@ BASE_DIR = Path(__file__).resolve().parent
 SERVERS_DIR = BASE_DIR / 'servers'
 
 app = Flask(__name__)
-# Desactivamos logs ruidosos para tener la consola limpia
 socketio = SocketIO(
     app,
     cors_allowed_origins="*",
@@ -85,18 +84,25 @@ def get_server_by_name(name: str):
     config.read(dir / '.conf')
     software = config['server']['software']
     version = config['server']['version']
-    build = config['server']['build']
-    return [software, version, build]
+    sha = config['server']['sha']
+    return_ = {}
+    if software == 'vanilla':
+        return_ = {'software': software, 'version': version, 'sha': sha}
+    return_['build_id'] = config['server']['build_id']
+    return return_
 
 @app.route('/')
 def index():
     servers = search_servers()
     return render_template('index.html', servers=servers)
 
-
 @app.route('/index')
 def index_alias():
     return index()
+
+@app.route('/server')
+def server_redirect():
+    return redirect(url_for('index'))
 
 @app.route('/server/new')
 def new_server():
@@ -208,12 +214,22 @@ def api_new_server():
         'message': 'The passed software is invalid'
     }, 400
 
+@app.route('/api/servers/delete', methods=['POST'])
+def api_delete_server():
+    server_name = str(request.get_json()['serverName'])
+    try:
+        util.delete_server(server_name)
+    except Exception as e:
+        print(e)
+        return '', 500
+    return '', 200
+
 @app.route('/server/<server_name>')
 def server(server_name):
     server = get_server_by_name(server_name)
     if not server:
-        return 
-    return render_template('server.html', server=server), 404
+        return render_template('404.html'), 404
+    return render_template('server.html', server=server, server_name=server_name)
 
 def emitir_a_clientes(evento, data):
     with clients_lock:
@@ -238,17 +254,16 @@ def handle_connect():
         namespace='/'
     )
 
-
 @socketio.on('disconnect')
 def handle_disconnect():
     with clients_lock:
         connected_clients.discard(request.sid) # type: ignore
 
 @socketio.on('start_server')
-def handle_start(server_name):
+def handle_start(data):
     global process, monitor
     if process is None or process.poll() is not None:
-        jar_path = Path(__file__).resolve().parent / 'servers' / ('server' + server_name) / 'server.jar'
+        jar_path = Path(__file__).resolve().parent / 'servers' / ('server.' + data['serverName']) / 'server.jar'
         try:
             assert(jar_path.exists())
         except AssertionError:

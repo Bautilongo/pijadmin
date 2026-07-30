@@ -1,5 +1,7 @@
 const DEFAULT_PANEL = 'panel-main';
 
+const SERVER_NAME = document.getElementById('panel-control').dataset.server
+
 function cleanRoute() {
     return `${window.location.pathname}${window.location.search}`;
 }
@@ -86,7 +88,9 @@ socket.on('disconnect', () => {
 function iniciar() {
     const consoleBox = document.getElementById('console');
     consoleBox.innerText = 'Iniciando servidor...\n'; // Limpia y comienza
-    socket.emit('start_server');
+    socket.emit('start_server', {
+        serverName: SERVER_NAME
+    });
     document.getElementById('btnStart').disabled = false;
     document.getElementById('btnStart').innerText = 'Iniciando...';
 }
