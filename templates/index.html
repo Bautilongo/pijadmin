@@ -14,7 +14,7 @@
                 <h3>{{server.suffix.lstrip('.')}}</h3>
             </div>
             <div class="server-actions">
-                <button class="btn btn-sm btn-secondary">Configurar</button>
+                <button class="btn btn-sm btn-secondary" id="configure-button" data-server="{{server.suffix.lstrip('.')}}" onclick="configure(this)">Configurar</button>
                 <button class="btn btn-sm btn-danger">Eliminar</button>
             </div>
         </div>
@@ -31,4 +31,5 @@
     </div>
     {% endif %}
 </div>
+<script src="{{ url_for('static', filename='js/index.js') }}"></script>
 {% endblock %}

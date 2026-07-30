@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Optional
 from threading import Lock
 import configparser
-from configparser import ConfigParser
 import re
 
 from util import util
@@ -18,8 +17,7 @@ from util import vanilla
 # ensure()
 # eula()
 
-UTIL_DIR = Path(__file__).resolve()
-BASE_DIR = UTIL_DIR.parent
+BASE_DIR = Path(__file__).resolve().parent
 SERVERS_DIR = BASE_DIR / 'servers'
 
 app = Flask(__name__)
@@ -95,14 +93,9 @@ def index():
 def index_alias():
     return index()
 
-@app.route('/server/<name>')
-def console(name):
-    return render_template('console.html')
-
 @app.route('/server/new')
 def new_server():
     return render_template('new_server.html')
-
 
 @app.route('/api/servers/new', methods=['POST'])
 def api_new_server():
@@ -132,32 +125,7 @@ def api_new_server():
     if software == 'vanilla':
         result = vanilla.create_server(name, version)
         if result == 0:
-            return {
-                'ok': 'true',
-                'message': 'created'
-            }, 201
-        if 'duplicated' in result.lower():
-            return {
-                'ok': 'false',
-                'error': 'duplicated_name',
-                'message': "Server's name is duplicated!"
-            }, 409
-        if 'version' in result.lower():
-            return {
-                'ok': 'false',
-                'error': 'invalid_version',
-                'message': 'The passed version is invalid'
-            }, 400
-        else:
-            return {
-                'ok': 'false',
-                'error': 'unexpected_error',
-                'message': 'An unexpected error occured, try again later or contact a developer'
-            }, 500
-
-    elif software == 'paper':
-        result = paper.create_server(name, version)
-        if result == 0:
+            util.create_conf_file(name, version)
             return {
                 'ok': 'true',
                 'message': 'created'
@@ -187,6 +155,39 @@ def api_new_server():
                 'message': 'An unexpected error occured, try again later or contact a developer'
             }, 500
 
+    elif software == 'paper':
+        result = paper.create_server(name, version)
+        if result == 0:
+            util.create_conf_file(name, version)
+            return {
+                'ok': 'true',
+                'message': 'created'
+            }, 201
+        if 'duplicated' in result.lower():
+            return {
+                'ok': 'false',
+                'error': 'duplicated_name',
+                'message': "Server's name is duplicated!"
+            }, 409
+        if 'version' in result.lower():
+            return {
+                'ok': 'false',
+                'error': 'invalid_version',
+                'message': 'The passed version is invalid'
+            }, 400
+        if 'paper' in result.lower():
+            return {
+                'ok': 'false',
+                'error': 'paper_error',
+                'message': 'Paper servers are unavailable, try again later'
+            }, 502
+        else:
+            return {
+                'ok': 'false',
+                'error': 'unexpected_error',
+                'message': 'An unexpected error occured, try again later or contact a developer'
+            }, 500
+
     elif software == 'spigot':
         pass
     elif software == 'forge':
@@ -196,8 +197,15 @@ def api_new_server():
     elif software == 'fabric':
         pass
 
-    return 'asd'
+    return {
+        'ok': 'false',
+        'error': 'invalid_software',
+        'message': 'The passed software is invalid'
+    }, 400
 
+@app.route('/server/<server_name>')
+def server(server_name):
+    return render_template('server.html', server_name=server_name)
 
 def emitir_a_clientes(evento, data):
     with clients_lock:
