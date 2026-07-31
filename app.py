@@ -342,4 +342,4 @@ def handle_command(data):
             emitir_a_clientes('console_output', {'data': f"[Error enviando comando: {e}]\n"})
 
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=5000, debug=True, use_reloader=True)
+    socketio.run(app, host='0.0.0.0', port=5000, debug=False, use_reloader=False)
