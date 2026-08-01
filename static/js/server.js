@@ -49,20 +49,23 @@ window.addEventListener('popstate', (event) => {
 const socket = io();
 
 socket.on('connect', () => {
+    socket.emit('join_server_room', { serverName: SERVER_NAME });
     document.getElementById('status').innerText = '● Conectado al Dashboard';
     document.getElementById('status').style.color = '#22c55e';
 });
 
 socket.on('server_status', (data) => {
+    console.log('me llego un server_status');
     const button = document.getElementById('btnStart');
-    const consoleBox = document.getElementById('console')
+    const consoleBox = document.getElementById('console');
     if (data.running) {
+        console.log('data.running es truthy');
         button.innerText = 'Apagar servidor';
         button.onclick = () => {
             modal = document.getElementById('shut-down-modal')
             modal.showModal()
             document.getElementById('modal-yes-button').onclick = () => {
-                socket.emit('stop_server')
+                socket.emit('stop_server', {'serverName': SERVER_NAME})
                 modal.close()
             }
             document.getElementById('modal-no-button').onclick = () => {
@@ -87,18 +90,21 @@ socket.on('disconnect', () => {
 function iniciar() {
     const consoleBox = document.getElementById('console');
     consoleBox.innerText = 'Iniciando servidor...\n'; // Limpia y comienza
-    socket.emit('start_server', {
-        serverName: SERVER_NAME
-    });
+    socket.emit('start_server', { serverName: SERVER_NAME }, (response => {
+        if (response.status === 'ok') {
+            document.getElementById('btnStart').innerText = 'Iniciando...';  
+        } else {
+            alert('Error al iniciar' + response.message)
+        }
+    }));
     document.getElementById('btnStart').disabled = false;
-    document.getElementById('btnStart').innerText = 'Iniciando...';
 }
 
 function enviarComando() {
     const input = document.getElementById('cmdInput');
     if (input.value.trim() !== '') {
         const comando = input.value;
-        socket.emit('send_command', { command: comando });
+        socket.emit('send_command', { command: comando, serverName: SERVER_NAME });
         const consoleBox = document.getElementById('console');
         consoleBox.innerText += `> ${comando}\n`;
         input.value = '';
@@ -107,7 +113,7 @@ function enviarComando() {
 
 socket.on('console_output', (msg) => {
     const consoleBox = document.getElementById('console');
-    consoleBox.innerText += msg.data;
+    consoleBox.innerText += msg.line;
     consoleBox.scrollTop = consoleBox.scrollHeight;
 })
 socket.on('system_metrics', (data) => {

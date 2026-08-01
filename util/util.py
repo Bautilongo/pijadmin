@@ -42,4 +42,4 @@ def delete_server(name: str):
 
 def open_browser():
     time.sleep(1.5)
-    webbrowser.open('http://localhost:5000')
+    # webbrowser.open('http://localhost:5000')

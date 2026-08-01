@@ -1,7 +1,7 @@
 import engineio.async_drivers.threading
 
 from flask import Flask, render_template, request, url_for, redirect
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, join_room, leave_room
 import subprocess
 import psutil
 from pathlib import Path
@@ -41,39 +41,44 @@ socketio = SocketIO(
     async_mode='threading'
 )
 
-
-process: Optional[subprocess.Popen] = None
-monitor: Optional[psutil.Process] = None
+# process is a dict that contains all servers in execution as 'server_name': subprocess
+process: dict[str, subprocess.Popen | None] = {}
+monitor: dict[str, psutil.Process | None] = {}
 connected_clients = set()
 clients_lock = Lock()
 
 
-def leer_consola():
-    """Hilo de fondo para leer los logs de Java sin bloquear Socket.IO."""
-    global process
-    emitir_a_clientes('console_output', {'data': '[Dashboard] Escuchando salida del servidor...\n'})
-    while process and process.poll() is None:
-        if process.stdout is None:
-            break
-        linea = process.stdout.readline()
-        print(linea)
-        if linea:
-            emitir_a_clientes('console_output', {'data': linea})
-        else:
-            socketio.sleep(1)
-    # Cuando el servidor termina
-    emitir_a_clientes('server_stopped', {})
+def stream_server_logs(server_name, process_obj):
+    """Background thread to read Java logs without blocking Socket.IO."""
+    try:
+        for line in iter(process_obj.stdout.readline, ''):
+            if not line:
+                break
 
-def transmitir_metricas():
+            socketio.emit(
+                'console_output',
+                {
+                    'serverName': server_name,
+                    'line': line
+                },
+                to=server_name
+            )
+
+    finally:
+        process_obj.stdout.close()
+
+def transmitir_metricas(server_name, process_obj):
     """Hilo de fondo para medir uso de RAM y CPU."""
-    global monitor, process
-    while process and process.poll() is None:
+    server_monitor = monitor.get(server_name)
+    assert(server_monitor)
+
+    while process_obj and process_obj.poll() is None:
         try:
             if monitor is None:
                 break
-            ram = round(monitor.memory_info().rss / (1024 * 1024), 1)
-            cpu = monitor.cpu_percent(interval=None)
-            emitir_a_clientes('system_metrics', {'ram': ram, 'cpu': cpu})
+            ram = round(server_monitor.memory_info().rss / (1024 * 1024), 1)
+            cpu = server_monitor.cpu_percent(interval=None)
+            clients_emit('system_metrics', {'ram': ram, 'cpu': cpu}, server_name)
         except Exception:
             break
         socketio.sleep(2)
@@ -243,28 +248,29 @@ def server(server_name):
         return render_template('404.html'), 404
     return render_template('server.html', server=server, server_name=server_name)
 
-def emitir_a_clientes(evento, data):
-    with clients_lock:
-        clientes = list(connected_clients)
-    for sid in clientes:
-        socketio.emit(evento, data, to=sid, namespace='/')
+def clients_emit(evento, data, server_name):
+        socketio.emit(evento, data, to=server_name, namespace='/')
 
 
-def emitir_estado_servidor():
-    en_ejecucion = process is not None and process.poll() is None
-    emitir_a_clientes('server_status', {'running': en_ejecucion})
+def emitir_estado_servidor(server_name, process_obj):
+    en_ejecucion = process_obj is not None and process_obj.poll() is None
+    clients_emit('server_status', {'running': en_ejecucion}, server_name)
 
+@socketio.on('join_server_room')
+def handle_join_room(data):
+    server_name = data.get('serverName')
+    if not server_name:
+        return
+    
+    join_room(server_name)
+    print(f'Cliente {request.sid} se unió a la sala del servidor: {server_name}') # type: ignore
+
+    emitir_estado_servidor(server_name, process.get(server_name))
 
 @socketio.on('connect')
 def handle_connect():
     with clients_lock:
         connected_clients.add(request.sid) # type: ignore
-    socketio.emit(
-        'server_status',
-        {'running': process is not None and process.poll() is None},
-        to=request.sid, # type: ignore
-        namespace='/'
-    )
 
 @socketio.on('disconnect')
 def handle_disconnect():
@@ -274,17 +280,24 @@ def handle_disconnect():
 @socketio.on('start_server')
 def handle_start(data):
     global process, monitor
-    if process is None or process.poll() is not None:
-        jar_path = Path(__file__).resolve().parent / 'servers' / ('server.' + data['serverName']) / 'server.jar'
+    server_name = data['serverName']
+    try:
+        process[server_name]
+    except KeyError:
+        process[server_name] = None
+
+    server_process = process[server_name]
+    if server_process is None or server_process.poll() is not None: # type: ignore
+        jar_path = Path(__file__).resolve().parent / 'servers' / ('server.' + server_name) / 'server.jar'
         try:
             assert(jar_path.exists())
-        except AssertionError:
-            return
+        except AssertionError as e:
+            return {'status': 'error', 'message': str(e)}
 
-        emitir_a_clientes('console_output', {'data': f'[Dashboard] Iniciando {jar_path.name}...\n'})
+        clients_emit('console_output', {'data': f'[Dashboard] Iniciando {jar_path.name}...\n'}, server_name)
         
         # Ejecutar Java con pipes y un flujo de buffer inmediato
-        process = subprocess.Popen(
+        proc = subprocess.Popen(
             ['java', '-Xmx2G', '-jar', str(jar_path), 'nogui'],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
@@ -295,61 +308,83 @@ def handle_start(data):
             encoding='utf-8',
             errors='replace'
         )
-        monitor = psutil.Process(process.pid)
-        emitir_estado_servidor()
+        process[server_name] = proc
+        monitor = {server_name: psutil.Process(proc.pid)}
+        emitir_estado_servidor(server_name, proc)
         
         # Usar la función propia de SocketIO para tareas en segundo plano
-        socketio.start_background_task(target=leer_consola)
-        socketio.start_background_task(target=transmitir_metricas)
+        socketio.start_background_task(stream_server_logs, server_name, proc)
+        socketio.start_background_task(transmitir_metricas, server_name, proc)
+        return {'status': 'ok'}
     else:
-        emitir_a_clientes('console_output', {'data': '[Dashboard] El servidor ya estaba en ejecución.\n'})
-        emitir_estado_servidor()
+        clients_emit('console_output', {'data': '[Dashboard] El servidor ya estaba en ejecución.\n'}, server_name)
+        emitir_estado_servidor(server_name, process.get(server_name))
+        return {'status': 'error', 'message': 'server was already in execution'}
 
 @socketio.on('stop_server')
-def stop_server():
+def stop_server(data):
     global process, monitor
+    server_name = data['serverName']
+    if not server_name:
+        return {'status': 'error', 'message': 'no server name'}
+    try:
+        process[server_name]
+    except KeyError:
+        process[server_name] = None
 
-    if process is None or process.poll() is not None:
-        emitir_a_clientes('console_output', {'data': '[Dashboard] No hay servidor en ejecución.\n'})
-        emitir_estado_servidor()
+    server_process = process[server_name]
+    if server_process is None or server_process.poll() is not None: # type: ignore
+        clients_emit('console_output', {'data': '[Dashboard] No hay servidor en ejecución.\n'}, server_name)
+        emitir_estado_servidor(server_name, server_process)
         return
 
-    emitir_a_clientes('console_output', {'data': '[Dashboard] Deteniendo servidor...\n'})
+    clients_emit('console_output', {'data': '[Dashboard] Deteniendo servidor...\n'}, server_name)
+
+    assert(isinstance(server_process, subprocess))
 
     try:
         # 1) Apagado limpio para Minecraft/Paper
-        if process.stdin is not None:
-            process.stdin.write("stop\n")
-            process.stdin.flush()
+        if server_process.stdin is not None:
+            server_process.stdin.write("stop\n")
+            server_process.stdin.flush()
 
-        process.wait(timeout=15)
+        server_process.wait(timeout=15)
     except subprocess.TimeoutExpired:
         # 2) Si no cierra, terminar forzado
-        process.terminate()
+        server_process.terminate()
         try:
-            process.wait(timeout=5)
+            server_process.wait(timeout=5)
         except subprocess.TimeoutExpired:
-            process.kill()
-            process.wait()
+            server_process.kill()
+            server_process.wait()
     finally:
-        monitor = None
-        process = None
-        emitir_estado_servidor()
-        emitir_a_clientes('server_stopped', {})    
+        monitor[server_name] = None
+        process[server_name] = None
+        emitir_estado_servidor(server_name, server_process)
+        clients_emit('server_stopped', {}, server_name)
 
 @socketio.on('send_command')
 def handle_command(data):
-    global process
     comando = data.get('command', '')
-    if process and process.poll() is None:
+    server_name = data.get('serverName')
+    if not server_name:
+        return {'status': 'error', 'message': 'no server name'}
+    server_process = process[server_name]
+
+    try:
+        assert(server_process)
+    except AssertionError:
+        return {'status': 'error', 'message': f'server {server_name} does not exist or is not running'}
+
+    if process and server_process.poll() is None:
         try:
-            if process.stdin is None:
+            if server_process.stdin is None:
                 return
-            process.stdin.write(f"{comando}\n")
-            process.stdin.flush()
+            server_process.stdin.write(f"{comando}\n")
+            server_process.stdin.flush()
         except (BrokenPipeError, OSError) as e:
             print(f"Error enviando comando: {e}")
-            emitir_a_clientes('console_output', {'data': f"[Error enviando comando: {e}]\n"})
+            clients_emit('console_output', {'data': f"[Error enviando comando: {e}]\n"}, server_name)
 
 if __name__ == '__main__':
     if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':

@@ -244,12 +244,17 @@ body {
     white-space: nowrap;
 }
 
+.dot-connected {
+    background: var(--success);
+    box-shadow: 0 0 0 3px rgba(59, 165, 93, 0.2);
+}
+
 .brand-dot {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background: var(--success);
-    box-shadow: 0 0 0 3px rgba(59, 165, 93, 0.2);
+    background: var(--fail);
+    box-shadow: 0 0 0 3px rgba(165, 59, 59, 0.2);
 }
 
 .nav-links {
