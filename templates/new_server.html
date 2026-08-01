@@ -4,24 +4,24 @@
 <main class="main-content">
     <div class="card new-server-card">
         <div class="content-header">
-            <h1>Crear un nuevo servidor</h1>
-            <p>Configura el nombre, la versión y el software base antes de descargar los archivos.</p>
+            <h1 data-i18n="new_server.create_new_server">Crear un nuevo servidor</h1>
+            <p data-i18n="new_server.new_server_description">Configura el nombre, la versión y el software base antes de descargar los archivos.</p>
         </div>
 
         <form id="create-server-form" class="new-server-form">
             <div class="form-grid">
                 <label class="form-field">
-                    <span>Nombre del servidor</span>
+                    <span data-i18n="new_server.server_name">Nombre del servidor</span>
                     <input name="name" type="text" required minlength="3" maxlength="20" pattern="^[A-Za-z0-9_-]{3,20}$" placeholder="mi-servidor" title="Usa 3 a 20 caracteres: letras, números, _ o -">
                 </label>
 
                 <label class="form-field">
-                    <span>Versión de Minecraft</span>
+                    <span data-i18n="new_server.minecraft_version">Versión de Minecraft</span>
                     <input name="version" type="text" required placeholder="1.20.4" pattern="^(1|26)\.\d+(\.\d+)?$">
                 </label>
 
                 <label class="form-field form-field-wide select-field" for="software-trigger">
-                    <span id="software-label">Software del servidor</span>
+                    <span id="software-label" data-i18n="new_server.server_software">Software del servidor</span>
                     <div class="custom-select" data-custom-select>
                         <button
                             id="software-trigger"
@@ -32,7 +32,7 @@
                             aria-controls="software-listbox"
                             aria-labelledby="software-label software-value"
                         >
-                            <span id="software-value" class="custom-select-value is-placeholder">Selecciona uno</span>
+                            <span id="software-value" class="custom-select-value is-placeholder" data-i18n="new_server.select_one">Selecciona uno</span>
                         </button>
 
                         <ul id="software-listbox" class="custom-select-list" role="listbox" tabindex="-1" hidden>
@@ -47,17 +47,17 @@
             </div>
 
             <div class="form-actions">
-                <a class="btn btn-secondary" href="/">Cancelar</a>
-                <button class="btn btn-primary" type="submit">Crear servidor</button>
+                <a class="btn btn-secondary" href="/" data-i18n="new_server.cancel">Cancelar</a>
+                <button class="btn btn-primary" type="submit" data-i18n="new_server.create_server">Crear servidor</button>
             </div>
         </form>
     </div>
 </main>
 
 <dialog id="error-modal">
-    <h2>No se pudo crear el servidor</h2>
-    <p id="error-modal-message">Ha ocurrido un error inesperado.</p>
-    <button class="btn btn-primary" id="error-modal-button" type="button">Continuar</button>
+    <h2 data-i18n="new_server.cannot_create_server">No se pudo crear el servidor</h2>
+    <p id="error-modal-message" data-i18n="new_server.unexpected_error">Ha ocurrido un error inesperado.</p>
+    <button class="btn btn-primary" id="error-modal-button" type="button" data-i18n="new_server.continue">Continuar</button>
 </dialog>
 
 <script src="{{ url_for('static', filename='js/new_server.js') }}"></script>

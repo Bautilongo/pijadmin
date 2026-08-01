@@ -5,18 +5,17 @@
 {% block body %}
     <main class="main-content">
         <div class="card" id="panel-control" data-server="{{ server_name }}">
-            <h2>Control del servidor</h2>
+            <h2 data-i18n="server.control">Control del servidor</h2>
             <button id="btnStart" onclick="iniciar()">Encender Servidor</button>
             <span id="status">● Desconectado</span>
             <span id="metrics">RAM: 0 MB | CPU: 0%</span>
         </div>
 
         <div class="card section" id="panel-main">
-            <h2>Opciones</h2>
             <p>version {{server['version']}}</p>
-            <button>cambiar</button>
-            <p>nombre</p>
-            <button>cambiar</button>
+            <button>Cambiar</button>
+            <p>Software: {{server['software']}}</p>
+            <button>Cambiar</button>
         </div>
 
         <div class="card section" id="panel-console">
@@ -25,6 +24,16 @@
             <br>
             <input type="text" autocomplete="off" id="cmdInput" placeholder="Escribe un comando (ej: op TuNombre)" onkeydown="if(event.key==='Enter') enviarComando()">
             <button onclick="enviarComando()">Enviar</button>
+        </div>
+
+        <div class="card section" id="panel-options">
+            <h2>server.properties</h2>
+            asd
+            <br>
+            asd
+            <br>
+            asd
+            <footer>Nota: tenés que reinciar tu servidor para que estas configuraciones hagan efecto</footer>
         </div>
         <style>#panel-console{display:none}</style>
     </main>

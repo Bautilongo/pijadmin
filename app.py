@@ -1,12 +1,16 @@
+import engineio.async_drivers.threading
+
 from flask import Flask, render_template, request, url_for, redirect
 from flask_socketio import SocketIO
 import subprocess
 import psutil
 from pathlib import Path
 from typing import Optional
-from threading import Lock
+from threading import Lock, Thread
 from configparser import ConfigParser
 import re
+import os
+import sys
 
 from util import util
 from util import paper
@@ -14,15 +18,21 @@ from util import vanilla
 
 config = ConfigParser()
 
-# from util.ensure import ensure, eula
-
-# ensure()
-# eula()
-
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = util.get_base_dir()
+print(BASE_DIR)
 SERVERS_DIR = BASE_DIR / 'servers'
 
-app = Flask(__name__)
+SERVERS_DIR.mkdir(exist_ok=True)
+
+if getattr(sys, 'frozen', False):
+    TEMP_BASE_DIR = Path(sys._MEIPASS) # type: ignore
+    app = Flask(
+        __name__,
+        template_folder=str(TEMP_BASE_DIR / 'templates'),
+        static_folder=str(TEMP_BASE_DIR / 'static')
+    )
+else:
+    app = Flask(__name__)
 socketio = SocketIO(
     app,
     cors_allowed_origins="*",
@@ -30,6 +40,7 @@ socketio = SocketIO(
     engineio_logger=False,
     async_mode='threading'
 )
+
 
 process: Optional[subprocess.Popen] = None
 monitor: Optional[psutil.Process] = None
@@ -69,6 +80,7 @@ def transmitir_metricas():
 
 def search_servers():
     servers = []
+    print(str(SERVERS_DIR))
     for item in SERVERS_DIR.iterdir():
         if not item.is_dir():
             continue
@@ -269,8 +281,6 @@ def handle_start(data):
         except AssertionError:
             return
 
-        # util.ensure(jar_path)
-
         emitir_a_clientes('console_output', {'data': f'[Dashboard] Iniciando {jar_path.name}...\n'})
         
         # Ejecutar Java con pipes y un flujo de buffer inmediato
@@ -296,7 +306,7 @@ def handle_start(data):
         emitir_estado_servidor()
 
 @socketio.on('stop_server')
-def stop_server(server_name):
+def stop_server():
     global process, monitor
 
     if process is None or process.poll() is not None:
@@ -342,4 +352,6 @@ def handle_command(data):
             emitir_a_clientes('console_output', {'data': f"[Error enviando comando: {e}]\n"})
 
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=5000, debug=False, use_reloader=False)
+    if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
+        Thread(target=util.open_browser).start()
+    socketio.run(app, host='0.0.0.0', port=5000, debug=True, use_reloader=False)

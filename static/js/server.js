@@ -59,7 +59,6 @@ socket.on('server_status', (data) => {
     if (data.running) {
         button.innerText = 'Apagar servidor';
         button.onclick = () => {
-            console.log('asdasd')
             modal = document.getElementById('shut-down-modal')
             modal.showModal()
             document.getElementById('modal-yes-button').onclick = () => {

@@ -179,11 +179,16 @@ document.addEventListener('keydown', (event) => {
   }
 });
 
+let currentTranslations = fetch(`/static/locals/${localStorage.getItem('pijadmin_lang') || 'es'}`);
+function t(keyPath) {
+  return keyPath.split('.').reduce((prev, curr) => (prev ? prev[curr] : null), currentTranslations || keyPath)
+}
+
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
   if (!hiddenSoftware.value) {
-    hiddenSoftware.setCustomValidity('Selecciona un software para continuar.');
+    hiddenSoftware.setCustomValidity(t('new_server.seelct_a_software')); // Selecciona un software para continuar.
     hiddenSoftware.reportValidity();
     openSelect();
     return;
@@ -193,7 +198,7 @@ form.addEventListener('submit', async (e) => {
   let software = currentForm.software.value
   if (software == 'spigot') {
     const modal = document.getElementById('error-modal');
-    document.getElementById('error-modal-message').innerText = 'No se puede usar spigot: es malísimo!';
+    document.getElementById('error-modal-message').innerText = t('new_server.spigot'); // No se puede usar spigot: es malísimo!
     modal.showModal();
     return;
   }
@@ -213,7 +218,7 @@ form.addEventListener('submit', async (e) => {
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
       const modal = document.getElementById('error-modal');
-      document.getElementById('error-modal-message').innerText = body.message || 'Ha ocurrido un error inesperado.';
+      document.getElementById('error-modal-message').innerText = body.message || t('new_server.unexpected_error'); // Ha ocurrido un error inesperado.
       modal.showModal();
       return;
     }
@@ -221,7 +226,7 @@ form.addEventListener('submit', async (e) => {
     window.location.href = `/server/${currentForm.name.value.trim()}`;
   } catch (err) {
     const modal = document.getElementById('error-modal');
-    document.getElementById('error-modal-message').innerText = 'No se pudo contactar con el servidor. Revisa la conexión e inténtalo de nuevo.';
+    document.getElementById('error-modal-message').innerText = t('new_Server.check_internet_connection'); // No se pudo contactar con el servidor. Revisa la conexión e inténtalo de nuevo.
     modal.showModal();
   }
 });

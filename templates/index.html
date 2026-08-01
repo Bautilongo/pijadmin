@@ -3,7 +3,7 @@
 {% block body %}
 <div class="main-content">
     <div class="content-header">
-        <h1>Servidores</h1>
+        <h1 data-i18n="index.servers">Servidores</h1>
     </div>
 
     {% if servers %}
@@ -14,28 +14,28 @@
                 <h3>{{server.suffix.lstrip('.')}}</h3>
             </div>
             <div class="server-actions">
-                <button class="btn btn-sm btn-secondary" id="configure-button" data-server="{{server.suffix.lstrip('.')}}" onclick="configure(this)">Configurar</button>
-                <button class="btn btn-sm btn-danger" id="delete-button" data-server="{{server.suffix.lstrip('.')}}" onclick="confirmDel(this)">Eliminar</button>
+                <button class="btn btn-sm btn-secondary" id="configure-button" data-server="{{server.suffix.lstrip('.')}}" data-i18n="index.configure" onclick="configure(this)">Configurar</button>
+                <button class="btn btn-sm btn-danger" id="delete-button" data-server="{{server.suffix.lstrip('.')}}" data-i18n="index.delete" onclick="confirmDel(this)">Eliminar</button>
             </div>
         </div>
         {% endfor %}
     </div>
     <div class="action-bar">
-        <button class="btn btn-primary" onclick="serverCreate()">+ Nuevo Servidor</button>
+        <button class="btn btn-primary" data-i18n="index.new_server" onclick="serverCreate()">+ Nuevo Servidor</button>
     </div>
     {% else %}
     <div class="empty-state">
-        <h2>¡Comienza tu primer servidor!</h2>
-        <p>Aún no has creado ningún servidor. Crea uno ahora para empezar.</p>
-        <a class="btn btn-primary btn-lg" href="/server/new">+ Crear Servidor</a>
+        <h2 data-i18n="index.start_new_server">¡Comienza tu primer servidor!</h2>
+        <p data-i18n="index.no_server_yet">Aún no has creado ningún servidor. Crea uno ahora para empezar.</p>
+        <a class="btn btn-primary btn-lg" data-i18n="index.create_server" href="/server/new">+ Crear Servidor</a>
     </div>
     {% endif %}
 </div>
 
 <dialog id="confirmation-modal">
-    <h2>Seguro de que querés eliminar este servidor?</h2>
-    <button class="btn btn-danger" id="delete-modal-button" onclick="del(this)">Sí</button>
-    <button class="btn btn-secondary" id="cancel-modal-button" type="button">Cancelar</button>
+    <h2 data-i18n="index.delete_confirm">Seguro de que querés eliminar este servidor?</h2>
+    <button class="btn btn-danger" id="delete-modal-button" data-i18n="delete_yes" onclick="del(this)">Sí</button>
+    <button class="btn btn-secondary" id="cancel-modal-button" type="button" data-i18n="delete_cancel">Cancelar</button>
 </dialog>
 <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 {% endblock %}

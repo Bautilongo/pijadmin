@@ -1,0 +1,55 @@
+{
+    "index": {
+        "servers": "Servidores",
+        "configure": "Configurar",
+        "delete": "Eliminar",
+        "new_server": "+ Nuevo Servidor",
+        "start_new_server": "¡Comienza tu primer servidor!",
+        "no_server_yet": "Aún no has creado ningún servidor. Crea uno ahora para empezar.",
+        "create_server": "+ Crear Servidor",
+        "delete_confirm": "Seguro de que querés eliminar este servidor?",
+        "delete_yes": "Sí",
+        "delete_cancel": "Cancelar"
+    },
+    "nav": {
+        "language": "Idioma",
+        "server_dashboard": "Dashboard del servidor",
+        "server": "Servidor",
+        "options": "Opciones",
+        "console": "Consola"
+    },
+    "new_server": {
+        "create_new_server": "Crear un nuevo servidor",
+        "new_server_description": "Configura el nombre, la versión y el software base antes de descargar los archivos.",
+        "server_name": "Nombre del servidor",
+        "minecraft_version": "Versión de Minecraft",
+        "server_software": "Software del servidor",
+        "select_one": "Selecciona uno",
+        "canel": "Cancelar",
+        "create_server": "Crear servidor",
+        "cannot_create_server": "No se pudo crear el servidor",
+        "unexpected_error": "Ha ocurrido un error inesperado.",
+        "continue": "Continuar",
+        "select_a_software": "Selecciona un software para continuar",
+        "spigot": "No se puede usar spigot: es malísimo!",
+        "check_internet_connection": "No se pudo contactar con el servidor. Revisa la conexión e inténtalo de nuevo."
+    },
+    "server": {
+        "control": "Control del servidor",
+        "turn_on": "Encender Servidor",
+        "disconnected": "● Desconectado",
+        "connected": "● Desconectado",
+        "version": "Versión",
+        "change": "Cambiar",
+        "name": "Nombre",
+        "live_console": "Consola en vivo",
+        "waiting_startup": " Esperando inicio del servidor...",
+        "waiting_console_output": "Servidor iniciado. Esperando salida de consola...\n",
+        "write_a_command": "Escribe un comando (ej: op TuNombre)",
+        "note": "Nota: tenés que reinciar tu servidor para que estas configuraciones hagan efecto",
+        "turn_off": "Apagar servidor",
+        "turn_off_confirmation": "Seguro de que quieres apagar el servidor?",
+        "server_stopped": "\n[Servidor detenido]\n"
+
+    }
+}

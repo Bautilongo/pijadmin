@@ -2,15 +2,48 @@
 
 {% block nav %}
     <header class="nav-wrapper">
-        <nav class="navbar-pill">
+        <div class="nav-inner">
+            <button class="nav-menu-btn" id="nav-menu-btn" aria-label="Menú" aria-expanded="false" aria-controls="nav-dropdown">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+            <div class="nav-dropdown" id="nav-dropdown" hidden>
+                <div class="nav-dropdown-section">
+                    <span class="nav-dropdown-label" data-i18n="nav.language">Idioma</span>
+                    <div class="nav-dropdown-options" id="nav-lang-options">
+                        <button class="nav-dropdown-option" data-lang="es" onclick="setLanguage('es')">
+                            <span class="nav-dropdown-option-check material-symbols-outlined">check</span>
+                            Español
+                        </button>
+                        <button class="nav-dropdown-option" data-lang="en" onclick="setLanguage('en')">
+                            <span class="nav-dropdown-option-check material-symbols-outlined">check</span>
+                            English
+                        </button>
+                    </div>
+                </div>
+                <div class="nav-dropdown-divider"></div>
+                <div class="nav-dropdown-section">
+                    <button class="nav-dropdown-option nav-dropdown-placeholder" disabled>
+                        <span class="material-symbols-outlined">settings</span>
+                        Ajustes
+                    </button>
+                    <button class="nav-dropdown-option nav-dropdown-placeholder" disabled>
+                        <span class="material-symbols-outlined">info</span>
+                        Acerca de
+                    </button>
+                </div>
+            </div>
+            <nav class="navbar-pill">
             <div class="nav-brand">
                 <span class="brand-dot" aria-hidden="true"></span>
-                <span>Dashboard del servidor {{server_name}}</span>
+                <span><span data-i18n="nav.server_dashboard">Dashboard del servidor </span><span>{{ server_name}}</span>
             </div>
             <div class="nav-links">
-                <a class="nav-link" href="#panel-options">Opciones</a>
-                <a class="nav-link" href="#panel-console">Consola</a>
+                <a class="nav-link" href="#panel-main" data-i18n="nav.server">Servidor</a>
+                <a class="nav-link" href="#panel-options" data-i18n="nav.options">Opciones</a>
+                <a class="nav-link" href="#panel-console" data-i18n="nav.console">Consola</a>
             </div>
-        </nav>
+            </nav>
+        </div>
     </header>
+<script src="{{ url_for('static', filename='js/nav.js') }}"></script>
 {% endblock %}

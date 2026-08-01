@@ -4,8 +4,16 @@ from pathlib import Path
 import os
 import shutil
 import stat
+import time
+import webbrowser
+import sys
 
-SERVERS_DIR = Path(__file__).resolve().parent.parent / 'servers'
+def get_base_dir():
+    if getattr(sys, 'frozen', False):
+        return Path(sys.executable).resolve().parent
+    else: return Path(__file__).resolve().parent.parent
+
+SERVERS_DIR = get_base_dir() / 'servers'
 config = ConfigParser()
 
 def create_conf_file(name: str, version: str, software: str, sha: str, build_id: int):
@@ -31,3 +39,7 @@ def delete_server(name: str):
     target = SERVERS_DIR / ('server.' + name)
     if target.exists():
         shutil.rmtree(target, onexc=remove_read_only)
+
+def open_browser():
+    time.sleep(1.5)
+    webbrowser.open('http://localhost:5000')
