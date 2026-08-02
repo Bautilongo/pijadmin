@@ -2,6 +2,8 @@ const DEFAULT_PANEL = 'panel-main';
 
 const SERVER_NAME = document.getElementById('panel-control').dataset.server
 
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 function cleanRoute() {
     return `${window.location.pathname}${window.location.search}`;
 }
@@ -50,17 +52,17 @@ const socket = io();
 
 socket.on('connect', () => {
     socket.emit('join_server_room', { serverName: SERVER_NAME });
-    document.getElementById('status').innerText = '● Conectado al Dashboard';
-    document.getElementById('status').style.color = '#22c55e';
+    document.getElementById('connection-dot').classList.add('dot-connected')
 });
 
 socket.on('server_status', (data) => {
-    console.log('me llego un server_status');
     const button = document.getElementById('btnStart');
     const consoleBox = document.getElementById('console');
-    if (data.running) {
-        console.log('data.running es truthy');
+    const status = data.status
+
+    if (status === 1) {
         button.innerText = 'Apagar servidor';
+        button.disabled = false;
         button.onclick = () => {
             modal = document.getElementById('shut-down-modal')
             modal.showModal()
@@ -75,29 +77,36 @@ socket.on('server_status', (data) => {
         if (!consoleBox.innerText.trim() || consoleBox.innerText.includes('Esperando inicio del servidor...')) {
             consoleBox.innerText = 'Servidor iniciado. Esperando salida de consola...\n';
         }
-    } else {
-        button.disabled = false;
+    } else if (status === 0) {
         button.innerText = 'Encender Servidor';
-        button.onclick = iniciar
+        button.onclick = iniciar;
+        button.disabled = false;
+    } else {
+        button.disabled = true;
+        button.innerText = 'iniciando...'
     }
+    console.log(status);
 });
 
 socket.on('disconnect', () => {
-    document.getElementById('status').innerText = '● Desconectado';
-    document.getElementById('status').style.color = '#ef4444';
+    document.getElementById('connection-dot').classList.remove('dot-connected')
 });
 
 function iniciar() {
     const consoleBox = document.getElementById('console');
-    consoleBox.innerText = 'Iniciando servidor...\n'; // Limpia y comienza
+    consoleBox.innerText = 'Iniciando servidor...\n'; 
+    const status = document.getElementById('status');
+    status.textContent = '● Servidor iniciando';
+    status.style.color = '#f59e0b';
     socket.emit('start_server', { serverName: SERVER_NAME }, (response => {
         if (response.status === 'ok') {
-            document.getElementById('btnStart').innerText = 'Iniciando...';  
+            btn = document.getElementById('btnStart');
+            btn.innerText = 'Iniciando...';  
+            btn.disabled = true;
         } else {
             alert('Error al iniciar' + response.message)
         }
     }));
-    document.getElementById('btnStart').disabled = false;
 }
 
 function enviarComando() {
@@ -111,9 +120,21 @@ function enviarComando() {
     }
 }
 
+socket.on('server_ready', async (data) => {
+    const status = document.getElementById('status');
+    await delay(500);
+    status.textContent = '● Servidor en línea';
+    status.style.color = '#3ba55d';
+    document.getElementById('console').innerText += `\n[Dashboard] Servidor listo! (${data.time}s)`;
+    const btn = document.getElementById('btnStart');
+    btn.innerText = 'Apagar servidor';
+    btn.disabled = false;
+    
+})
+
 socket.on('console_output', (msg) => {
     const consoleBox = document.getElementById('console');
-    consoleBox.innerText += msg.line;
+    consoleBox.innerText += (msg.line + '\n');
     consoleBox.scrollTop = consoleBox.scrollHeight;
 })
 socket.on('system_metrics', (data) => {
@@ -121,7 +142,6 @@ socket.on('system_metrics', (data) => {
 });
 
 socket.on('server_stopped', () => {
-    document.getElementById('btnStart').disabled = false;
     document.getElementById('btnStart').innerText = 'Encender Servidor';
     const consoleBox = document.getElementById('console');
     consoleBox.innerText += '\n[Servidor detenido]\n';

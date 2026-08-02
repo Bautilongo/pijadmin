@@ -13,7 +13,7 @@
     },
     "nav": {
         "language": "Idioma",
-        "server_dashboard": "Dashboard del servidor",
+        "server_dashboard": "Dashboard del servidor ",
         "server": "Servidor",
         "options": "Opciones",
         "console": "Consola"
@@ -37,8 +37,9 @@
     "server": {
         "control": "Control del servidor",
         "turn_on": "Encender Servidor",
-        "disconnected": "● Desconectado",
-        "connected": "● Desconectado",
+        "disconnected": "● Servidor apagado",
+        "starting": "● Servidor iniciando",
+        "connected": "● Servidor en línea",
         "version": "Versión",
         "change": "Cambiar",
         "name": "Nombre",

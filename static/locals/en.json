@@ -37,8 +37,9 @@
     "server": {
         "control": "Server control",
         "turn_on": "Turn on",
-        "disconnected": "● Disconnected",
-        "connected": "● Connected",
+        "disconnected": "● Server offline",
+        "starting": "● Server starting",
+        "connected": "● Server online",
         "version": "Version",
         "change": "Change",
         "name": "Name",

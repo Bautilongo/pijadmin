@@ -44,6 +44,9 @@ socketio = SocketIO(
 # process is a dict that contains all servers in execution as 'server_name': subprocess
 process: dict[str, subprocess.Popen | None] = {}
 monitor: dict[str, psutil.Process | None] = {}
+# status is a dict that contains status of all servers in execution stored with their PID
+# 0 or not being in the dict means the server is off, 0.5 means it is starting, 1 means it is ready
+status: dict[str, int | float] = {}
 connected_clients = set()
 clients_lock = Lock()
 
@@ -52,6 +55,9 @@ def stream_server_logs(server_name, process_obj):
     """Background thread to read Java logs without blocking Socket.IO."""
     try:
         for line in iter(process_obj.stdout.readline, ''):
+            match = re.search(r'Done \((\d+(?:\.\d+)?)s\)!', line)
+            if match:
+                server_ready(server_name, process_obj, match.group(1))
             if not line:
                 break
 
@@ -66,6 +72,10 @@ def stream_server_logs(server_name, process_obj):
 
     finally:
         process_obj.stdout.close()
+
+def server_ready(server_name, process_obj, time):
+    status[process_obj.pid] = 1
+    clients_emit('server_ready', {'time': time}, server_name)
 
 def transmitir_metricas(server_name, process_obj):
     """Hilo de fondo para medir uso de RAM y CPU."""
@@ -249,12 +259,15 @@ def server(server_name):
     return render_template('server.html', server=server, server_name=server_name)
 
 def clients_emit(evento, data, server_name):
-        socketio.emit(evento, data, to=server_name, namespace='/')
+        socketio.emit(evento, data, to=server_name)
 
 
 def emitir_estado_servidor(server_name, process_obj):
-    en_ejecucion = process_obj is not None and process_obj.poll() is None
-    clients_emit('server_status', {'running': en_ejecucion}, server_name)
+    status_ = None
+    if process_obj is not None and process_obj.poll() is None:
+        status_ = status.get(process_obj.pid)
+    if status_ is None: status_ = 0
+    clients_emit('server_status', {'status': status_}, server_name)
 
 @socketio.on('join_server_room')
 def handle_join_room(data):
@@ -315,6 +328,7 @@ def handle_start(data):
         # Usar la función propia de SocketIO para tareas en segundo plano
         socketio.start_background_task(stream_server_logs, server_name, proc)
         socketio.start_background_task(transmitir_metricas, server_name, proc)
+        status[str(proc.pid)] = 0.5
         return {'status': 'ok'}
     else:
         clients_emit('console_output', {'data': '[Dashboard] El servidor ya estaba en ejecución.\n'}, server_name)
