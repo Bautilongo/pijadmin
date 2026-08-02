@@ -301,7 +301,7 @@ def handle_start(data):
 
     server_process = process[server_name]
     if server_process is None or server_process.poll() is not None: # type: ignore
-        jar_path = Path(__file__).resolve().parent / 'servers' / ('server.' + server_name) / 'server.jar'
+        jar_path = SERVERS_DIR / ('server.' + server_name) / 'server.jar'
         try:
             assert(jar_path.exists())
         except AssertionError as e:

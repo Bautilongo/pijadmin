@@ -96,15 +96,17 @@ function iniciar() {
     const consoleBox = document.getElementById('console');
     consoleBox.innerText = 'Iniciando servidor...\n'; 
     const status = document.getElementById('status');
-    status.textContent = '● Servidor iniciando';
-    status.style.color = '#f59e0b';
     socket.emit('start_server', { serverName: SERVER_NAME }, (response => {
         if (response.status === 'ok') {
             btn = document.getElementById('btnStart');
             btn.innerText = 'Iniciando...';  
             btn.disabled = true;
+            status.textContent = '● Servidor iniciando';
+            status.style.color = '#f59e0b';
+
         } else {
             alert('Error al iniciar' + response.message)
+
         }
     }));
 }
