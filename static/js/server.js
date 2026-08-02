@@ -101,12 +101,11 @@ function iniciar() {
             btn = document.getElementById('btnStart');
             btn.innerText = 'Iniciando...';  
             btn.disabled = true;
-            status.textContent = '● Servidor iniciando';
-            status.style.color = '#f59e0b';
 
         } else {
             alert('Error al iniciar' + response.message)
-
+            status.textContent = '● Servidor iniciando';
+            status.style.color = '#f59e0b';
         }
     }));
 }
