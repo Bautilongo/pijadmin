@@ -1,6 +1,6 @@
 # ⛏️ PIJadmin
 
-An in-development lightweight desktop script designed to manage, host, and monitor local Minecraft servers effortlessly. Built with Python, Flask, WebSockets, and a web-based dashboard interface.
+PIJAdmin is a desktop dashboard that simplifies hosting and managing Minecraft servers by bringing server setup, monitoring, console access and plugin management into a single interface.
 
 ---
 
