@@ -29,15 +29,15 @@ PIJAdmin is a desktop dashboard that simplifies hosting and managing Minecraft s
 - Python 3.12+ installed on your system.
 - Java 17 or higher (required to run modern Minecraft server builds).
 
-### Installation
+### Installation 
 
 1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/tu-usuario/nombre-de-tu-repo.git](https://github.com/tu-usuario/nombre-de-tu-repo.git)
-   cd nombre-de-tu-repo
+   git clone https://github.com/Bautilongo/pijadmin
+   cd pijadmin
    ```
 
-2. **Install dependencies** `NOT WORKING YET`
+2. **Install dependencies** > ⚠️ Installation is still a work in progress.
     ```bash
     pip install -r requirements.txt
     ```
@@ -48,6 +48,19 @@ PIJAdmin is a desktop dashboard that simplifies hosting and managing Minecraft s
     ```
 
 4. Open your browser and navigate to http://localhost:5000 to access the dashboard
+
+---
+
+## Roadmap
+
+- [x] Server launcher
+- [x] Live console
+- [x] CPU & RAM monitoring
+- [ ] Multiple server support
+- [ ] Plugin manager
+- [ ] Automatic backups
+
+---
 
 ### 📄 License
 
