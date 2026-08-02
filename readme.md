@@ -1,4 +1,4 @@
-# ⛏️ Minecraft Server Dashboard
+# ⛏️ PIJadmin
 
 An in-development lightweight desktop script designed to manage, host, and monitor local Minecraft servers effortlessly. Built with Python, Flask, WebSockets, and a web-based dashboard interface.
 
