@@ -19,7 +19,6 @@ from util import vanilla
 config = ConfigParser()
 
 BASE_DIR = util.get_base_dir()
-print(BASE_DIR)
 SERVERS_DIR = BASE_DIR / 'servers'
 
 SERVERS_DIR.mkdir(exist_ok=True)
@@ -95,7 +94,6 @@ def transmitir_metricas(server_name, process_obj):
 
 def search_servers():
     servers = []
-    print(str(SERVERS_DIR))
     for item in SERVERS_DIR.iterdir():
         if not item.is_dir():
             continue
@@ -112,11 +110,10 @@ def get_server_by_name(name: str):
     software = config['server']['software']
     version = config['server']['version']
     sha = config['server']['sha']
-    return_ = {}
     if software == 'vanilla':
-        return_ = {'software': software, 'version': version, 'sha': sha}
-    return_['build_id'] = config['server']['build_id']
-    return return_
+        return {'software': software, 'version': version, 'sha': sha}
+    return {'software': software, 'version': version, 'build_id': config['server']['build_id']}
+
 
 @app.route('/')
 def index():
