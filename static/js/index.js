@@ -16,7 +16,6 @@ async function del(button) {
     const data = {
         serverName: button.dataset.server
     };
-    console.log(data)
     await fetch('/api/servers/delete', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

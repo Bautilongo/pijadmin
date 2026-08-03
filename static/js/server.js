@@ -85,7 +85,6 @@ socket.on('server_status', (data) => {
         button.disabled = true;
         button.innerText = 'iniciando...'
     }
-    console.log(status);
 });
 
 socket.on('disconnect', () => {
