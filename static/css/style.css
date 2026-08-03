@@ -185,6 +185,7 @@ body {
     cursor: pointer;
     transition: background var(--transition), color var(--transition);
     text-align: left;
+    text-decoration: none;
 }
 
 .nav-dropdown-option:hover:not(:disabled) {
@@ -208,11 +209,6 @@ body {
 
 .nav-dropdown-option.active .nav-dropdown-option-check {
     visibility: visible;
-}
-
-.nav-dropdown-placeholder {
-    opacity: 0.4;
-    cursor: not-allowed;
 }
 
 .navbar-pill {
