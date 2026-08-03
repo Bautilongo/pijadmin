@@ -38,7 +38,7 @@
     },
     "server": {
         "control": "Control del servidor",
-        "turn_on": "Encender Servidor",
+        "start": "Encender Servidor",
         "disconnected": "● Servidor apagado",
         "starting": "● Servidor iniciando",
         "connected": "● Servidor en línea",

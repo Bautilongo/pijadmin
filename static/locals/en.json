@@ -38,7 +38,7 @@
     },
     "server": {
         "control": "Server control",
-        "turn_on": "Turn on",
+        "start": "Start server",
         "disconnected": "● Server offline",
         "starting": "● Server starting",
         "connected": "● Server online",
@@ -47,12 +47,11 @@
         "name": "Name",
         "live_console": "Live console",
         "waiting_startup": " Waiting for server startup...",
-        "waiting_console_output": "Servidor iniciado. Esperando salida de consola...\n",
-        "write_a_command": "Escribe un comando (ej: op TuNombre)",
-        "note": "Nota: tenés que reinciar tu servidor para que estas configuraciones hagan efecto",
-        "turn_off": "Apagar servidor",
-        "turn_off_confirmation": "Seguro de que quieres apagar el servidor?",
-        "server_stopped": "\n[Servidor detenido]\n"
-
+        "waiting_console_output": "Server started. Waiting for console output...\n",
+        "write_a_command": "Write a command (e.g.: op YourName)",
+        "note": "Note: you need to restart your server for these settings to take effect",
+        "turn_off": "Turn off server",
+        "turn_off_confirmation": "Are you sure you want to turn off the server?",
+        "server_stopped": "\n[Server stopped]\n"
     }
 }

@@ -258,9 +258,12 @@ def server(server_name):
         return render_template('404.html'), 404
     return render_template('server.html', server=server, server_name=server_name)
 
+@app.route('/settings')
+def settings():
+    return render_template('settings.html')
+
 def clients_emit(evento, data, server_name):
         socketio.emit(evento, data, to=server_name)
-
 
 def emitir_estado_servidor(server_name, process_obj):
     status_ = None

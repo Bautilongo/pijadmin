@@ -6,16 +6,26 @@
     <main class="main-content">
         <div class="card" id="panel-control" data-server="{{ server_name }}">
             <h2 data-i18n="server.control">Control del servidor</h2>
-            <button id="btnStart" onclick="iniciar()">Encender Servidor</button>
-            <span id="status">● Desconectado</span>
+            <button id="btnStart" onclick="iniciar()" data-i18n="server.start">Encender Servidor</button>
+            <span id="status" data-i18n="server.disconnected">● Servidor apagado</span>
             <span id="metrics">RAM: 0 MB | CPU: 0%</span>
         </div>
 
         <div class="card section" id="panel-main">
-            <p>version {{server['version']}}</p>
-            <button>Cambiar</button>
-            <p>Software: {{server['software']}}</p>
-            <button>Cambiar</button>
+            <div class="server-option">
+                <img src="{{ url_for('static', filename='icons/login.svg') }}" alt="adress">
+                <p><span data-i18n="server.adress">Dirección IP</span> coming soon</p>
+            </div>
+            <div class="server-option">
+                <img src="{{ url_for('static', filename='icons/commit.svg') }}" alt="version">
+                <p><span data-i18n="server.version">Versión</span> {{server['version']}}</p>
+                <button class="btn btn-secondary">Cambiar</button>
+            </div>
+            <div class="server-option">
+                <img src="{{ url_for('static', filename='icons/software.svg') }}" alt="software">
+                <p><span data-i18n="server.software">Software</span> {{server['software'].capitalize()}}</p>
+                <button class="btn btn-secondary">Cambiar</button>
+            </div>
         </div>
 
         <div class="card section" id="panel-console">
@@ -27,7 +37,10 @@
         </div>
 
         <div class="card section" id="panel-options">
-            <h2>server.properties</h2>
+            <header>
+                <img src="{{ url_for('static', filename='icons/code.svg') }}" alt="properties">
+                <h2>server.properties</h2>
+            </header>
             asd
             <br>
             asd
