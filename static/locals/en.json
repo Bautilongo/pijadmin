@@ -16,7 +16,9 @@
         "server_dashboard": "Dashboard of server ",
         "server": "Server",
         "options": "Options",
-        "console": "Console"
+        "console": "Console",
+        "about": "About",
+        "settings": "Settings"
     },
     "new_server": {
         "create_new_server": "Create new server",
