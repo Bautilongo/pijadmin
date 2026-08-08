@@ -55,23 +55,6 @@ def get_version(v:str, *, download:bool=False):
         return r
     return download_url
     
-def download(url, path):
-    headers = {
-            'accept': 'application/octet-stream, */*',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
-        }
-    res = requests.get(url, headers=headers, stream=True)
-
-    if res.status_code == 200:
-        # Escribimos el archivo en modo binario ('wb')
-        with open(path, 'wb') as archivo:
-            for chunk in res.iter_content(chunk_size=8192):
-                if chunk:  # Filtrar chunks vacíos
-                    archivo.write(chunk)
-        print('¡Descarga completada con éxito!')
-    else:
-        print(f'Error al descargar: Código HTTP {res.status_code}')
-
 def create_server(name:str, version:str):
     try:
         target = SERVERS_DIR / ('server.' + name) / 'server.jar'
@@ -80,7 +63,7 @@ def create_server(name:str, version:str):
         except FileExistsError:
             return 'Duplicated server name!'
         r = get_version(version, download=True)
-        download(r[0], target) # type: ignore
+        util.download(r[0], target) # type: ignore
         if not check_sha1(target, r[1]): # type: ignore
             raise Exception('The downloaded server executable is invalid, corrupt or was modified, please try again')
     except Exception as e:

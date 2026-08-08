@@ -7,8 +7,10 @@ import stat
 import time
 import webbrowser
 import sys
+import requests
+import hashlib
 
-def get_base_dir():
+def get_base_dir() -> Path:
     if getattr(sys, 'frozen', False):
         return Path(sys.executable).resolve().parent
     else: return Path(__file__).resolve().parent.parent
@@ -43,3 +45,29 @@ def delete_server(name: str):
 def open_browser():
     time.sleep(1.5)
     webbrowser.open('http://localhost:5000')
+
+def download(url, path):
+    headers = {
+            'accept': 'application/octet-stream, */*',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
+        }
+    res = requests.get(url, headers=headers, stream=True)
+
+    if res.status_code == 200:
+        # Escribimos el archivo en modo binario ('wb')
+        with open(path, 'wb') as archivo:
+            for chunk in res.iter_content(chunk_size=8192):
+                if chunk:  # Filtrar chunks vacíos
+                    archivo.write(chunk)
+        print('¡Descarga completada con éxito!')
+    else:
+        print(f'Error al descargar: Código HTTP {res.status_code}')
+
+def check_sha256(path: Path, expected: str) -> bool:
+    sha = hashlib.sha256()
+
+    with path.open("rb") as f:
+        for block in iter(lambda: f.read(8192), b""):
+            sha.update(block)
+
+    return sha.hexdigest().lower() == expected.lower()

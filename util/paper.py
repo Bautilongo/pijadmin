@@ -8,6 +8,7 @@ import sys
 
 from util import util
 
+
 BASE_DIR = util.get_base_dir()
 SERVERS_DIR = BASE_DIR / 'servers'
 jar_path = SERVERS_DIR / 'server.jar'
@@ -18,15 +19,6 @@ def ask_for_version():
         if not re.fullmatch(r'^(1|26)\.\d+(\.\d+)?$', version):
             continue
         return version
-
-def check_sha256(path: Path, expected: str) -> bool:
-    sha = hashlib.sha256()
-
-    with path.open("rb") as f:
-        for block in iter(lambda: f.read(8192), b""):
-            sha.update(block)
-
-    return sha.hexdigest().lower() == expected.lower()
 
 
 def get_lastest_build(v:str, *, download:bool=False):
@@ -47,23 +39,6 @@ def get_lastest_build(v:str, *, download:bool=False):
     if not download:
         return r
     return download_url
-    
-def download(url, path):
-    headers = {
-            'accept': 'application/octet-stream, */*',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
-        }
-    res = requests.get(url, headers=headers, stream=True)
-
-    if res.status_code == 200:
-        # Escribimos el archivo en modo binario ('wb')
-        with open(path, 'wb') as archivo:
-            for chunk in res.iter_content(chunk_size=8192):
-                if chunk:  # Filtrar chunks vacíos
-                    archivo.write(chunk)
-        print('¡Descarga completada con éxito!')
-    else:
-        print(f'Error al descargar: Código HTTP {res.status_code}')
 
 def create_server(name:str, version:str):
     try:
@@ -73,8 +48,8 @@ def create_server(name:str, version:str):
         except FileExistsError:
             return 'Duplicated server name!'
         r = get_lastest_build(version, download=True)
-        download(r[0], target) # type: ignore
-        if not check_sha256(target, r[1]): # type: ignore
+        util.download(r[0], target) # type: ignore
+        if not util.check_sha256(target, r[1]): # type: ignore
             raise Exception('The downloaded server executable is invalid, corrupt or was modified, please try again')
     except Exception as e:
         target.unlink(missing_ok=True)
