@@ -39,7 +39,6 @@ def check_java_regedit(version: int) -> pathlib.Path | False:
         while True:
             try:
                 subkey = winreg.EnumKey(key, i)
-                print(subkey)
                 if subkey.startswith(f'{version}'):
                     print(f'Found JDK {subkey}')
                     msi_route = f'{reg_path}\\{subkey}\\hotspot\\MSI'
@@ -50,7 +49,6 @@ def check_java_regedit(version: int) -> pathlib.Path | False:
                         winreg.KEY_READ | winreg.KEY_WOW64_64KEY
                     )
                     java_home, _ = winreg.QueryValueEx(msi_key, 'Path')
-                    print(java_home)
                     winreg.CloseKey(msi_key)
                     java_exe = pathlib.Path(java_home) / 'bin' / 'java.exe'
                     if java_exe.exists():
@@ -68,26 +66,21 @@ def get_java(server:str) -> tuple[int, pathlib.Path | None] | False:
     conf_file = SERVERS_DIR / ('server.' + server) / '.conf'
     config.read(conf_file.resolve())
     server_version = config.get('server', 'version')
-    if config.get('java', 'version') != '1' and config.get('java', 'version') != '0':
+    if config.get('java', 'custom_installation') != '1' and config.get('java', 'custom_installation') != '0':
         version = get_java_version(server_version)
-        print(f'\n\n\n{version}\n\n\n')
         util.write_conf_java(server, None, version)
         return int(version), None # Devolvemos para pedir confirmación
     if int(config.get('java','custom_installation')):
-        print(config.get('java','custom_installation'))
         return False # custom installations are not checked
     version = config.get('java', 'version')
-    print(f'\n\n\n{version}\n\n\n')
     path = config.get('java', 'path')
     if not version or not path:
-        print(f'\n\n\n{version}\n\n\n')
         version, path = ensure_java(server_version, install=False)
-        print(f'\n\n\n{version}\n\n\n')
         util.write_conf_java(server, path, version)
         return int(version), path
     return int(version), Path(path) if path else None # assumes that java hasnt been removed, must be checked later
 
-def install_java(version: str) -> pathlib.Path:
+def install_java(version: str, server_name: str):
     """Installs a compatible Java version if not found."""
     if os.name == 'nt':  # Windows
         # For Windows, we install adoptium jdk
@@ -115,7 +108,9 @@ def install_java(version: str) -> pathlib.Path:
             subprocess.run(cmd, check=True)
             dir.unlink()
             print(f'Java {version} installed successfully.')
-            return True
+            java_path = check_java_regedit(version)
+            util.write_conf_java(server_name, java_path, version)
+            return java_path
         except subprocess.CalledProcessError as e:
             print(f'Error installing Java: {e}')
             return False

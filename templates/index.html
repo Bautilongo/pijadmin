@@ -34,8 +34,10 @@
 
 <dialog id="confirmation-modal">
     <h2 data-i18n="index.delete_confirm">Seguro de que querés eliminar este servidor?</h2>
-    <button class="btn btn-danger" id="delete-modal-button" data-i18n="delete_yes" onclick="del(this)">Sí</button>
-    <button class="btn btn-secondary" id="cancel-modal-button" type="button" data-i18n="delete_cancel">Cancelar</button>
+    <div class="modal-actions">
+        <button class="btn btn-danger" id="delete-modal-button" data-i18n="delete_yes" onclick="del(this)">Sí</button>
+        <button class="btn btn-secondary" id="cancel-modal-button" type="button" data-i18n="delete_cancel" onclick="document.getElementById('confirmation-modal').close()">Cancelar</button>
+    </div>
 </dialog>
 <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 {% endblock %}

@@ -37,9 +37,6 @@ def get_version(v:str, *, download:bool=False):
     if not new_url:
         raise Exception('invalid version')
     r = requests.get(new_url)
-
-    print(r.json())
-
     if not r.ok:
         if r.status_code == 502 or r.status_code == 500:
             raise Exception('Mojang servers unavailable')

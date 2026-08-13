@@ -57,7 +57,9 @@
 <dialog id="error-modal">
     <h2 data-i18n="new_server.cannot_create_server">No se pudo crear el servidor</h2>
     <p id="error-modal-message" data-i18n="new_server.unexpected_error">Ha ocurrido un error inesperado.</p>
-    <button class="btn btn-primary" id="error-modal-button" type="button" data-i18n="new_server.continue">Continuar</button>
+    <div class="modal-actions">
+        <button class="btn btn-primary" id="error-modal-button" type="button" data-i18n="new_server.continue">Continuar</button>
+    </div>
 </dialog>
 
 <script src="{{ url_for('static', filename='js/new_server.js') }}"></script>

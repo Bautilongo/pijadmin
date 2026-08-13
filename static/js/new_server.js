@@ -179,6 +179,24 @@ document.addEventListener('keydown', (event) => {
   }
 });
 
+const modalStack = new Set();
+
+const nativeShowModal = HTMLDialogElement.prototype.showModal;
+HTMLDialogElement.prototype.showModal = function () {
+  modalStack.add(this);
+  document.body.classList.add('modal-open');
+  return nativeShowModal.call(this);
+};
+
+const nativeClose = HTMLDialogElement.prototype.close;
+HTMLDialogElement.prototype.close = function () {
+  modalStack.delete(this);
+  if (modalStack.size === 0) {
+    document.body.classList.remove('modal-open');
+  }
+  return nativeClose.call(this);
+};
+
 let currentTranslations = fetch(`/static/locals/${localStorage.getItem('pijadmin_lang') || 'es'}`);
 function t(keyPath) {
   return keyPath.split('.').reduce((prev, curr) => (prev ? prev[curr] : null), currentTranslations || keyPath)

@@ -1,5 +1,23 @@
 const DEFAULT_PANEL = 'panel-main';
 
+const modalStack = new Set();
+
+const nativeShowModal = HTMLDialogElement.prototype.showModal;
+HTMLDialogElement.prototype.showModal = function () {
+    modalStack.add(this);
+    document.body.classList.add('modal-open');
+    return nativeShowModal.call(this);
+};
+
+const nativeClose = HTMLDialogElement.prototype.close;
+HTMLDialogElement.prototype.close = function () {
+    modalStack.delete(this);
+    if (modalStack.size === 0) {
+        document.body.classList.remove('modal-open');
+    }
+    return nativeClose.call(this);
+};
+
 const SERVER_NAME = document.getElementById('panel-control').dataset.server
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));

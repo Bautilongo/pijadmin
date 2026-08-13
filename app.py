@@ -299,9 +299,7 @@ def handle_start(data):
 
         clients_emit('console_output', {'data': f'[Dashboard] Iniciando {jar_path.name}...\n'}, server_name)
 
-        print(server_name)
         java_ = java.get_java(server_name)
-        print(java_)
         if java_ == False:
             pass
         if java_[1] is None:
@@ -319,7 +317,7 @@ def install_java(data):
     server_name = data['serverName']
     java_version = data['javaVersion']
     try:
-        java_path = java.install_java(java_version)
+        java_path = java.install_java(java_version, server_name)
         if java_path is None:
             return {'status': 'error', 'message': f'Java installation failed'}
         return confirm_start(server_name, str(java_path))
@@ -330,7 +328,6 @@ def install_java(data):
 def confirm_start(server_name, java_path):
     global process, monitor
     jar_path = SERVERS_DIR / ('server.' + server_name) / 'server.jar'
-    print(str(java_path))
     # Ejecutar Java con pipes y un flujo de buffer inmediato
     proc = subprocess.Popen(
         [java_path, '-Xmx2G', '-jar', str(jar_path), 'nogui'],
