@@ -9,6 +9,7 @@ import webbrowser
 import sys
 import requests
 import hashlib
+import pathlib
 
 def get_base_dir() -> Path:
     if getattr(sys, 'frozen', False):
@@ -17,6 +18,18 @@ def get_base_dir() -> Path:
 
 SERVERS_DIR = get_base_dir() / 'servers'
 config = ConfigParser()
+
+def get_server_by_name(name: str):
+    dir = SERVERS_DIR / ('server.' + name)
+    if not dir.is_dir():
+        return None
+    config.read(dir / '.conf')
+    software = config['server']['software']
+    version = config['server']['version']
+    sha = config['server']['sha']
+    if software == 'vanilla':
+        return {'software': software, 'version': version, 'sha': sha}
+    return {'software': software, 'version': version, 'build_id': config['server']['build_id']}
 
 def create_conf_file(name: str, version: str, software: str, sha: str, build_id: int):
     config['server'] = {
@@ -71,3 +84,19 @@ def check_sha256(path: Path, expected: str) -> bool:
             sha.update(block)
 
     return sha.hexdigest().lower() == expected.lower()
+
+def write_conf_java(server, path=None, version=None, custom_installation=False):
+    conf_path = SERVERS_DIR / ("server." + server) / ".conf"
+    parser = ConfigParser()
+
+    if conf_path.exists():
+        parser.read(conf_path)
+
+    parser["java"] = {
+        "custom_installation": str(int(custom_installation)),
+        "path": str(path.resolve()) if path else "",
+        "version": str(version) if version is not None else "",
+    }
+
+    with open(conf_path, "w", encoding="utf-8") as f:
+        parser.write(f)

@@ -5,16 +5,17 @@ from flask_socketio import SocketIO, join_room, leave_room
 import subprocess
 import psutil
 from pathlib import Path
-from typing import Optional
 from threading import Lock, Thread
 from configparser import ConfigParser
 import re
 import os
 import sys
+import asyncio
 
 from util import util
 from util import paper
 from util import vanilla
+from util import java
 
 config = ConfigParser()
 
@@ -101,19 +102,6 @@ def search_servers():
             continue
         servers.append(item)
     return servers if servers else None
-
-def get_server_by_name(name: str):
-    dir = SERVERS_DIR / ('server.' + name)
-    if not dir.is_dir():
-        return None
-    config.read(dir / '.conf')
-    software = config['server']['software']
-    version = config['server']['version']
-    sha = config['server']['sha']
-    if software == 'vanilla':
-        return {'software': software, 'version': version, 'sha': sha}
-    return {'software': software, 'version': version, 'build_id': config['server']['build_id']}
-
 
 @app.route('/')
 def index():
@@ -250,7 +238,7 @@ def api_delete_server():
 
 @app.route('/server/<server_name>')
 def server(server_name):
-    server = get_server_by_name(server_name)
+    server = util.get_server_by_name(server_name)
     if not server:
         return render_template('404.html'), 404
     return render_template('server.html', server=server, server_name=server_name)
@@ -292,8 +280,8 @@ def handle_disconnect():
 
 @socketio.on('start_server')
 def handle_start(data):
-    global process, monitor
     server_name = data['serverName']
+    server = util.get_server_by_name(server_name)
     try:
         process[server_name]
     except KeyError:
@@ -301,39 +289,69 @@ def handle_start(data):
 
     server_process = process[server_name]
     if server_process is None or server_process.poll() is not None: # type: ignore
-        jar_path = SERVERS_DIR / ('server.' + server_name) / 'server.jar'
+        server_path = SERVERS_DIR / ('server.' + server_name)
+        jar_path = server_path / 'server.jar'
+
         try:
             assert(jar_path.exists())
         except AssertionError as e:
             return {'status': 'error', 'message': str(e)}
 
         clients_emit('console_output', {'data': f'[Dashboard] Iniciando {jar_path.name}...\n'}, server_name)
-        
-        # Ejecutar Java con pipes y un flujo de buffer inmediato
-        proc = subprocess.Popen(
-            ['java', '-Xmx2G', '-jar', str(jar_path), 'nogui'],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            bufsize=1,
-            cwd=jar_path.parent,
-            encoding='utf-8',
-            errors='replace'
-        )
-        process[server_name] = proc
-        monitor = {server_name: psutil.Process(proc.pid)}
-        emitir_estado_servidor(server_name, proc)
-        
-        # Usar la función propia de SocketIO para tareas en segundo plano
-        socketio.start_background_task(stream_server_logs, server_name, proc)
-        socketio.start_background_task(transmitir_metricas, server_name, proc)
-        status[str(proc.pid)] = 0.5
-        return {'status': 'ok'}
+
+        print(server_name)
+        java_ = java.get_java(server_name)
+        print(java_)
+        if java_ == False:
+            pass
+        if java_[1] is None:
+            return {'status': 'installation_needed', 'message': f'java SDK v{java_[0]} needs to be installed', 'java_version': java_[0]}  # pedir confirmación de instalación
+        if java_[1] is not None:
+            if not java_[1].exists():
+                return {'status': 'error', 'message': f'Java path {java_[1]} does not exist'}
+        return confirm_start(server_name, str(java_[1]))
     else:
         clients_emit('console_output', {'data': '[Dashboard] El servidor ya estaba en ejecución.\n'}, server_name)
-        emitir_estado_servidor(server_name, process.get(server_name))
         return {'status': 'error', 'message': 'server was already in execution'}
+
+@socketio.on('install_java')
+def install_java(data):
+    server_name = data['serverName']
+    java_version = data['javaVersion']
+    try:
+        java_path = java.install_java(java_version)
+        if java_path is None:
+            return {'status': 'error', 'message': f'Java installation failed'}
+        return confirm_start(server_name, str(java_path))
+    except Exception as e:
+        return {'status': 'error', 'message': str(e)}
+
+@socketio.on('confirm_start')
+def confirm_start(server_name, java_path):
+    global process, monitor
+    jar_path = SERVERS_DIR / ('server.' + server_name) / 'server.jar'
+    print(str(java_path))
+    # Ejecutar Java con pipes y un flujo de buffer inmediato
+    proc = subprocess.Popen(
+        [java_path, '-Xmx2G', '-jar', str(jar_path), 'nogui'],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        bufsize=1,
+        cwd=jar_path.parent,
+        encoding='utf-8',
+        errors='replace'
+    )
+    process[server_name] = proc
+    monitor = {server_name: psutil.Process(proc.pid)}
+    emitir_estado_servidor(server_name, proc)
+    
+    # Usar la función propia de SocketIO para tareas en segundo plano
+    socketio.start_background_task(stream_server_logs, server_name, proc)
+    socketio.start_background_task(transmitir_metricas, server_name, proc)
+
+    return {'status': 'ok'}
 
 @socketio.on('stop_server')
 def stop_server(data):
@@ -353,8 +371,7 @@ def stop_server(data):
         return
 
     clients_emit('console_output', {'data': '[Dashboard] Deteniendo servidor...\n'}, server_name)
-
-    assert(isinstance(server_process, subprocess))
+    assert(isinstance(server_process, subprocess.Popen))
 
     try:
         # 1) Apagado limpio para Minecraft/Paper
@@ -403,4 +420,4 @@ def handle_command(data):
 if __name__ == '__main__':
     if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
         Thread(target=util.open_browser).start()
-    socketio.run(app, host='0.0.0.0', port=5000, debug=True, use_reloader=False)
+    socketio.run(app, host='0.0.0.0', port=5000, debug=True, use_reloader=True)

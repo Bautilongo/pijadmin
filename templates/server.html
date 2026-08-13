@@ -52,5 +52,10 @@
         <button id="modal-yes-button">Sí</button>
         <button id="modal-no-button">No</button>
     </dialog>
+    <dialog id="install">
+        <h2><span data-i18n="install.title">Para iniciar tu servidor en la </span><strong>{{server['version']}}</strong><span data-i18n="install.subtitle">debes instalar el Java SDK en su versión</span><strong id="java-version">v</strong></h2>
+        <button id="install-yes-button" onclick="confirmInstalation()">Instalala por mí</button>
+        <button id="install-no-button">Ya tengo una instalación</button>
+    </dialog>
 <script src="{{ url_for('static', filename='js/server.js') }}"></script>
 {% endblock %}

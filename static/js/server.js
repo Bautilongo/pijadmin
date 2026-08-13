@@ -58,9 +58,12 @@ socket.on('connect', () => {
 socket.on('server_status', (data) => {
     const button = document.getElementById('btnStart');
     const consoleBox = document.getElementById('console');
-    const status = data.status
+    const status = data.status;
+    const statusElement = document.getElementById('status');
 
     if (status === 1) {
+        statusElement.textContent = '● Servidor en línea';
+        statusElement.style.color = '#3ba55d';
         button.innerText = 'Apagar servidor';
         button.disabled = false;
         button.onclick = () => {
@@ -100,13 +103,34 @@ function iniciar() {
             btn = document.getElementById('btnStart');
             btn.innerText = 'Iniciando...';  
             btn.disabled = true;
-
-        } else {
-            alert('Error al iniciar' + response.message)
             status.textContent = '● Servidor iniciando';
             status.style.color = '#f59e0b';
+
+        } else if (response.status === 'installation_needed') {
+            modal = document.getElementById('install')
+            modal.showModal()
+            document.getElementById('java-version').textContent = response.java_version;
+            document.getElementById('java-version').dataset.javaVersion = response.java_version;
+        } 
+        else {
+            alert('Error al iniciar ' + response.message)
         }
     }));
+}
+
+function confirmInstalation() {
+    const modal = document.getElementById('install');
+    const javaVersion = document.getElementById('java-version').dataset.javaVersion;
+    modal.close();
+    const consoleBox = document.getElementById('console');
+    consoleBox.innerText += 'Instalando Java...\n';
+    socket.emit('install_java', { serverName: SERVER_NAME, javaVersion: javaVersion }, (response) => {
+        if (response.status === 'ok') {
+            consoleBox.innerText += 'Java instalado correctamente.\n';
+        } else {
+            alert('Error al instalar Java: ' + response.message);
+        }
+    });
 }
 
 function enviarComando() {
@@ -129,7 +153,6 @@ socket.on('server_ready', async (data) => {
     const btn = document.getElementById('btnStart');
     btn.innerText = 'Apagar servidor';
     btn.disabled = false;
-    
 })
 
 socket.on('console_output', (msg) => {
