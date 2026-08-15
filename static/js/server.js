@@ -211,6 +211,10 @@ socket.on('server_ready', async (data) => {
     const btn = document.getElementById('btnStart');
     btn.innerText = 'Apagar servidor';
     btn.disabled = false;
+    btn.onclick = () => {
+        modal = document.getElementById('shut-down-modal')
+        modal.showModal()
+    }
 })
 
 socket.on('console_output', (msg) => {
@@ -226,4 +230,7 @@ socket.on('server_stopped', () => {
     document.getElementById('btnStart').innerText = 'Encender Servidor';
     const consoleBox = document.getElementById('console');
     consoleBox.innerText += '\n[Servidor detenido]\n';
+    const statusElement = document.getElementById('status');
+    statusElement.textContent = '● Servidor detenido';
+    statusElement.style.color = '#ef4444';
 });

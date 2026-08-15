@@ -41,6 +41,34 @@
                 <img src="{{ url_for('static', filename='icons/code.svg') }}" alt="properties">
                 <h2>server.properties</h2>
             </header>
+            <div id="properties-container">
+                <div class="property">
+                    <label for="gamemode">Gamemode</label>
+                    <select id="gamemode" onchange="updateProperty('gamemode', this.value)">
+                        <option value="survival">Survival</option>
+                        <option value="creative">Creative</option>
+                        <option value="adventure">Adventure</option>
+                        <option value="spectator">Spectator</option>
+                    </select>
+                </div>
+                <div class="property">
+                    <label for="difficulty">Difficulty</label>
+                    <select id="difficulty" onchange="updateProperty('difficulty', this.value)">
+                        <option value="peaceful">Peaceful</option>
+                        <option value="easy">Easy</option>
+                        <option value="normal">Normal</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                </div>
+                <div class="property">
+                    <label for="max-players">Max Players</label>
+                    <input type="number" id="max-players" min="1" onchange="updateProperty('max-players', this.value)">
+                </div>
+                <div class="property">
+                    <label for="cracked">Cracked</label>
+                    <input type="checkbox" id="cracked" onchange="updateProperty('cracked', this.checked)">
+                </div>
+            </div>
             <footer>Nota: tenés que reinciar tu servidor para que estas configuraciones hagan efecto</footer>
         </div>
         <style>#panel-console{display:none;}#panel-options{display:none;}</style>
