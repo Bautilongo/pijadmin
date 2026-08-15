@@ -142,9 +142,13 @@ socket.on('server_status', (data) => {
         button.innerText = 'Encender Servidor';
         button.onclick = iniciar;
         button.disabled = false;
+        statusElement.textContent = '● Servidor detenido';
+        statusElement.style.color = '#ef4444';
     } else {
         button.disabled = true;
         button.innerText = 'iniciando...'
+        statusElement.textContent = '● Servidor iniciando';
+        statusElement.style.color = '#f59e0b';
     }
 });
 
@@ -180,6 +184,8 @@ function confirmInstalation() {
     const modal = document.getElementById('install');
     const javaVersion = document.getElementById('java-version').dataset.javaVersion;
     modal.close();
+    messageModal = document.getElementById('message');
+    messageModal.showModal();
     const consoleBox = document.getElementById('console');
     consoleBox.innerText += 'Instalando Java...\n';
     socket.emit('install_java', { serverName: SERVER_NAME, javaVersion: javaVersion }, (response) => {

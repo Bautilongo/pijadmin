@@ -68,6 +68,7 @@ def get_java(server:str) -> tuple[int, pathlib.Path | None] | False:
     server_version = config.get('server', 'version')
     if config.get('java', 'custom_installation') != '1' and config.get('java', 'custom_installation') != '0':
         version = get_java_version(server_version)
+        print('version in get_java (config.get):', version)
         util.write_conf_java(server, None, version)
         return int(version), None # Devolvemos para pedir confirmación
     if int(config.get('java','custom_installation')):
@@ -76,6 +77,7 @@ def get_java(server:str) -> tuple[int, pathlib.Path | None] | False:
     path = config.get('java', 'path')
     if not version or not path:
         version, path = ensure_java(server_version, install=False)
+        print('version in get_java (not version or not path):', version)
         util.write_conf_java(server, path, version)
         return int(version), path
     return int(version), Path(path) if path else None # assumes that java hasnt been removed, must be checked later
@@ -102,13 +104,26 @@ def install_java(version: str, server_name: str):
         
         print(f'Installing JDK {version} from {str(dir.resolve())}')
 
-        ps_script = f'Start-Process msiexec.exe -ArgumentList "/i `"{str(dir.resolve())}`" /qn /norestart ADDLOCAL=FeatureMain" -Verb RunAs -Wait'
+        log_path = dir.with_suffix('.log')
+        ps_script = (
+            '$arguments = @('
+            f'"/i", "{str(dir.resolve())}", "/qn", "/norestart", '
+            f'"ADDLOCAL=FeatureMain", "/l*v", "{str(log_path.resolve())}"'
+            '); '
+            '$installer = Start-Process msiexec.exe -ArgumentList $arguments '
+            '-Verb RunAs -Wait -PassThru; exit $installer.ExitCode'
+        )
         cmd = ['powershell.exe', '-Command', ps_script]
         try:
             subprocess.run(cmd, check=True)
-            dir.unlink()
-            print(f'Java {version} installed successfully.')
             java_path = check_java_regedit(version)
+            print('java_path in install_java (regedit):', java_path)
+            if not java_path:
+                print(f'Java {version} installer finished, but the JDK was not found.')
+                print(f'Installer log: {log_path}')
+                return False
+            dir.unlink(missing_ok=True)
+            print(f'Java {version} installed successfully.')
             util.write_conf_java(server_name, java_path, version)
             return java_path
         except subprocess.CalledProcessError as e:
@@ -122,12 +137,13 @@ def ensure_java(minecraft_version: str = None, install=False, java_version=None)
     """Ensures that a compatible Java version is installed for the given Minecraft version."""
     if not java_version:
         java_version = get_java_version(minecraft_version) # Get the required Java version for the given Minecraft version
+    print('java_version in ensure_java:', java_version)
     if sys.platform == 'win32': # Windows
         result = check_java_regedit(java_version)
         if result: return java_version, result
         elif install: return java_version, install_java(java_version)
         else:
-            return result, None
+            return java_version, None
     elif sys.platform.startswith('linux'): # Linux not implemented yet, but going to soon
         return
         # result = check_java_posix() 

@@ -114,7 +114,7 @@ def set_sfw_mode():
 @app.route('/')
 def index():
     servers = search_servers()
-    sfw_mode = request.cookies.get('sfw_mode', 'false').lower() == 'true'
+    sfw_mode = request.cookies.get('sfw_mode', 'false').strip('"') == 'true'
     return render_template('index.html', servers=servers, sfw_mode=sfw_mode)
 
 @app.route('/index')
@@ -127,7 +127,7 @@ def server_redirect():
 
 @app.route('/server/new')
 def new_server():
-    sfw_mode = request.cookies.get('sfw_mode', 'false').lower() == 'true'
+    sfw_mode = request.cookies.get('sfw_mode', 'false').strip('"') == 'true'
     return render_template('new_server.html', sfw_mode=sfw_mode)
 
 @app.route('/api/servers/new', methods=['POST'])
@@ -329,7 +329,7 @@ def install_java(data):
     java_version = data['javaVersion']
     try:
         java_path = java.install_java(java_version, server_name)
-        if java_path is None:
+        if not java_path:
             return {'status': 'error', 'message': f'Java installation failed'}
         return confirm_start(server_name, str(java_path))
     except Exception as e:
@@ -351,6 +351,7 @@ def confirm_start(server_name, java_path):
         encoding='utf-8',
         errors='replace'
     )
+    status[proc.pid] = 0.5
     process[server_name] = proc
     monitor = {server_name: psutil.Process(proc.pid)}
     emitir_estado_servidor(server_name, proc)

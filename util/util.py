@@ -20,6 +20,17 @@ def get_base_dir() -> Path:
 SERVERS_DIR = get_base_dir() / 'servers'
 config = ConfigParser()
 
+def get_java_version(minecraft_version_str):
+    v = tuple(int(x) for x in minecraft_version_str.split('.'))
+    if v >= (1, 20 , 5):
+        return 21
+    elif v >= (1, 18):
+        return 17
+    elif v >= (1, 17):
+        return 16
+    else:
+        return 8
+
 def get_server_by_name(name: str):
     dir = SERVERS_DIR / ('server.' + name)
     if not dir.is_dir():
@@ -39,6 +50,11 @@ def create_conf_file(name: str, version: str, software: str, sha: str, build_id:
         'software': software,
         'sha': sha,
         'build_id': str(build_id)
+    }
+    config['java'] = {
+        'custom_installation': '0',
+        'path': '',
+        'version': get_java_version(version)
     }
 
     with open(SERVERS_DIR / ('server.' + name) / '.conf', 'w') as f:

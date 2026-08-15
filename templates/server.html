@@ -78,7 +78,7 @@
         <h2>Seguro de que quieres apagar el servidor?</h2>
         <div class="modal-actions">
             <button id="modal-yes-button">Sí</button>
-            <button id="modal-no-button">No</button>
+            <button id="modal-no-button" onclick="document.getElementById('shut-down-modal').close()">No</button>
         </div>
     </dialog>
     <dialog id="install">
@@ -87,6 +87,10 @@
             <button id="install-yes-button" onclick="confirmInstalation()">Instalala por mí</button>
             <button id="install-no-button">Ya tengo una instalación</button>
         </div>
+    </dialog>
+    <dialog id="message">
+        <h3>Necesitaremos permisos de administrador, por favor acepta la solicitud de permisos...</h3>
+        <button onclick="document.getElementById('message').close()">Ok</button>
     </dialog>
 <script src="{{ url_for('static', filename='js/server.js') }}"></script>
 {% endblock %}
