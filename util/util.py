@@ -4,6 +4,7 @@ from pathlib import Path
 import os
 import shutil
 import stat
+import socket
 import time
 import webbrowser
 import sys
@@ -55,9 +56,15 @@ def delete_server(name: str):
     if target.exists():
         shutil.rmtree(target, onexc=remove_read_only)
 
-def open_browser():
-    time.sleep(1.5)
-    webbrowser.open('http://localhost:5000')
+def open_browser(port: int = 5000, timeout: float = 15) -> None:
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        try:
+            with socket.create_connection(('127.0.0.1', port), timeout=0.25):
+                webbrowser.open(f'http://localhost:{port}')
+                return
+        except OSError:
+            time.sleep(0.1)
 
 def download(url, path):
     headers = {

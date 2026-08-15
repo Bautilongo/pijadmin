@@ -18,6 +18,42 @@ HTMLDialogElement.prototype.close = function () {
     return nativeClose.call(this);
 };
 
+function enable_sfw_mode(button) {
+    fetch('/set_sfw_mode', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: 'sfw_mode="true"'
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                button.classList.add('active');
+                button.innerText = 'Desactivar modo SFW';
+                button.onclick = () => disable_sfw_mode(button);
+            }
+        });
+}
+
+function disable_sfw_mode(button) {
+    fetch('/set_sfw_mode', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: 'sfw_mode="false"'
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                button.classList.remove('active');
+                button.innerText = 'Activar modo SFW';
+                button.onclick = () => enable_sfw_mode(button);
+            }
+        });
+}
+
 const SERVER_NAME = document.getElementById('panel-control').dataset.server
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));

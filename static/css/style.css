@@ -148,6 +148,17 @@ body {
     z-index: 1001;
 }
 
+.nav-settings-dropdown {
+    left: calc(100% + 10px);
+    right: auto;
+    top: 0;
+    bottom: auto;
+}
+
+.nav-settings-menu {
+    position: relative;
+}
+
 .nav-dropdown-section {
     display: flex;
     flex-direction: column;
@@ -200,6 +211,13 @@ body {
 .nav-dropdown-option .material-symbols-outlined {
     font-size: 18px;
     line-height: 1;
+}
+
+.nav-placeholder-icon {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+    border: 1px dashed currentColor;
 }
 
 .nav-dropdown-option-check {

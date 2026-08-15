@@ -22,10 +22,24 @@
                 </div>
                 <div class="nav-dropdown-divider"></div>
                 <div class="nav-dropdown-section">
-                    <a class="nav-dropdown-option" href="{{ url_for('settings') }}">
-                        <img src="{{ url_for('static', filename='icons/settings.svg') }}" alt="Settings">
-                        <span data-i18n="nav.settings">Ajustes</span>
-                    </a>
+                    <div class="nav-settings-menu">
+                        <button class="nav-dropdown-option" id="nav-settings-btn" type="button" aria-expanded="false" aria-controls="nav-settings-dropdown">
+                            <img src="{{ url_for('static', filename='icons/settings.svg') }}" alt="Settings">
+                            <span data-i18n="nav.settings">Ajustes</span>
+                        </button>
+                        <div class="nav-dropdown nav-settings-dropdown" id="nav-settings-dropdown" hidden>
+                            <div class="nav-dropdown-section">
+                                <button class="nav-dropdown-option" type="button" {% if not sfw_mode %} onclick="enable_sfw_mode(this)" {% else %} onclick="disable_sfw_mode(this)" {% endif %}>
+                                    <svg class="nav-placeholder-icon" viewBox="0 0 24 24" aria-hidden="true"></svg>
+                                    <span>{% if not sfw_mode %} Activar modo SFW {% else %} Desactivar modo SFW {% endif %}</span>
+                                </button>
+                                <button class="nav-dropdown-option" type="button">
+                                    <svg class="nav-placeholder-icon" viewBox="0 0 24 24" aria-hidden="true"></svg>
+                                    <span>Placeholder 2</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                     <a class="nav-dropdown-option" href="https://pijadmin.xenomorphyk.one">
                         <img src="{{ url_for('static', filename='icons/about.svg') }}" alt="About">
                         <span data-i18n="nav.about">Acerca de</span>

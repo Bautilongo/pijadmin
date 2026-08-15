@@ -1,6 +1,6 @@
 import engineio.async_drivers.threading
 
-from flask import Flask, render_template, request, url_for, redirect
+from flask import Flask, make_response, render_template, request, url_for, redirect
 from flask_socketio import SocketIO, join_room, leave_room
 import subprocess
 import psutil
@@ -33,6 +33,7 @@ if getattr(sys, 'frozen', False):
     )
 else:
     app = Flask(__name__)
+app.config['TEMPLATES_AUTO_RELOAD'] = True  # picks up template edits without a debug reloader
 socketio = SocketIO(
     app,
     cors_allowed_origins="*",
@@ -103,10 +104,19 @@ def search_servers():
         servers.append(item)
     return servers if servers else None
 
+@app.route('/set_sfw_mode', methods=['POST'])
+def set_sfw_mode():
+    sfw_mode = request.form.get('sfw_mode', 'false')
+    print(sfw_mode, '\n\n\n')
+    response = make_response({'status':'success','sfw_mode':sfw_mode})
+    response.set_cookie('sfw_mode', sfw_mode, max_age=30*24*60*60)
+    return response
+
 @app.route('/')
 def index():
     servers = search_servers()
-    return render_template('index.html', servers=servers)
+    sfw_mode = request.cookies.get('sfw_mode', 'false') == 'true'
+    return render_template('index.html', servers=servers, sfw_mode=sfw_mode)
 
 @app.route('/index')
 def index_alias():
@@ -118,7 +128,8 @@ def server_redirect():
 
 @app.route('/server/new')
 def new_server():
-    return render_template('new_server.html')
+    sfw_mode = request.cookies.get('sfw_mode', 'false') == 'true'
+    return render_template('new_server.html', sfw_mode=sfw_mode)
 
 @app.route('/api/servers/new', methods=['POST'])
 def api_new_server():
@@ -241,7 +252,9 @@ def server(server_name):
     server = util.get_server_by_name(server_name)
     if not server:
         return render_template('404.html'), 404
-    return render_template('server.html', server=server, server_name=server_name)
+    sfw_mode = request.cookies.get('sfw_mode', 'false') == 'true'
+    print(sfw_mode, "\n\n\n")
+    return render_template('server.html', server=server, server_name=server_name, sfw_mode=sfw_mode)
 
 @app.route('/settings')
 def settings():
@@ -417,4 +430,4 @@ def handle_command(data):
 if __name__ == '__main__':
     if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
         Thread(target=util.open_browser).start()
-    socketio.run(app, host='0.0.0.0', port=5000, debug=True, use_reloader=True)
+    socketio.run(app, host='0.0.0.0', port=5000, debug=False, use_reloader=False)
