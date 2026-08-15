@@ -30,7 +30,7 @@
                         <div class="nav-dropdown nav-settings-dropdown" id="nav-settings-dropdown" hidden>
                             <div class="nav-dropdown-section">
                                 <button class="nav-dropdown-option" type="button" {% if not sfw_mode %} onclick="enable_sfw_mode(this)" {% else %} onclick="disable_sfw_mode(this)" {% endif %}>
-                                    <svg class="nav-placeholder-icon" viewBox="0 0 24 24" aria-hidden="true"></svg>
+                                    <img src="{% if not sfw_mode %}{{ url_for('static', filename='icons/shield_with_heart.svg') }}{% else %}{{ url_for('static', filename='icons/shield_off.svg') }}{% endif %}" alt="SFW Mode">
                                     <span>{% if not sfw_mode %} Activar modo SFW {% else %} Desactivar modo SFW {% endif %}</span>
                                 </button>
                                 <button class="nav-dropdown-option" type="button">

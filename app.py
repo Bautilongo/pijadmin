@@ -108,14 +108,14 @@ def search_servers():
 def set_sfw_mode():
     sfw_mode = request.form.get('sfw_mode', 'false')
     print(sfw_mode, '\n\n\n')
-    response = make_response({'status':'success','sfw_mode':sfw_mode})
+    response = make_response({'status':'success','sfw_mode':sfw_mode}, 200)
     response.set_cookie('sfw_mode', sfw_mode, max_age=30*24*60*60)
     return response
 
 @app.route('/')
 def index():
     servers = search_servers()
-    sfw_mode = request.cookies.get('sfw_mode', 'false') == 'true'
+    sfw_mode = request.cookies.get('sfw_mode', 'false').lower() == 'true'
     return render_template('index.html', servers=servers, sfw_mode=sfw_mode)
 
 @app.route('/index')
@@ -128,7 +128,7 @@ def server_redirect():
 
 @app.route('/server/new')
 def new_server():
-    sfw_mode = request.cookies.get('sfw_mode', 'false') == 'true'
+    sfw_mode = request.cookies.get('sfw_mode', 'false').lower() == 'true'
     return render_template('new_server.html', sfw_mode=sfw_mode)
 
 @app.route('/api/servers/new', methods=['POST'])
@@ -252,8 +252,9 @@ def server(server_name):
     server = util.get_server_by_name(server_name)
     if not server:
         return render_template('404.html'), 404
-    sfw_mode = request.cookies.get('sfw_mode', 'false') == 'true'
-    print(sfw_mode, "\n\n\n")
+    sfw_mode = request.cookies.get('sfw_mode', 'false').strip('"') == 'true'
+    print(f'sfw_mode: {sfw_mode}')
+    print(request.cookies.get('sfw_mode', 'false').strip('"'))
     return render_template('server.html', server=server, server_name=server_name, sfw_mode=sfw_mode)
 
 @app.route('/settings')

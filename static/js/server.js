@@ -30,8 +30,10 @@ function enable_sfw_mode(button) {
         .then(data => {
             if (data.status === 'success') {
                 button.classList.add('active');
-                button.innerText = 'Desactivar modo SFW';
+                button.querySelector(':scope > span').innerText = 'Desactivar modo SFW';
                 button.onclick = () => disable_sfw_mode(button);
+                button.querySelector(':scope > img').src = '/static/icons/shield_off.svg';
+                document.querySelector('.project-identity-logo').src = '/static/icons/logo_sfw.svg';
             }
         });
 }
@@ -48,8 +50,10 @@ function disable_sfw_mode(button) {
         .then(data => {
             if (data.status === 'success') {
                 button.classList.remove('active');
-                button.innerText = 'Activar modo SFW';
+                button.querySelector(':scope > span').innerText = 'Activar modo SFW';
                 button.onclick = () => enable_sfw_mode(button);
+                button.querySelector(':scope > img').src = '/static/icons/shield_with_heart.svg';
+                document.querySelector('.project-identity-logo').src = '/static/icons/logo.svg';
             }
         });
 }
