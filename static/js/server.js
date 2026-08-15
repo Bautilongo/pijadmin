@@ -58,6 +58,76 @@ function disable_sfw_mode(button) {
         });
 }
 
+function getElementValue(element) {
+    const tagName = element.tagName.toLowerCase();
+
+    // Manejo de select múltiple
+    if (tagName === 'select' && element.multiple) {
+        return Array.from(element.selectedOptions).map(option => option.value);
+    }
+
+    // Manejo por tipo de input
+    switch (element.type) {
+        case 'checkbox':
+            return element.checked;
+        case 'number':
+        case 'range':
+            return element.valueAsNumber;
+        default:
+            return element.value;
+    }
+}
+
+function updateProperties(container) {
+    values = {}
+    container.querySelectorAll(':scope input, :scope select').forEach((input) => {
+        values[input.id] = getElementValue(input)
+    })
+
+    fetch('/update_properties', {
+        method: 'post',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: `properties=${JSON.stringify(values)}`
+    })
+}
+
+document.querySelectorAll('[data-property-select]').forEach((customSelect) => {
+    const trigger = customSelect.querySelector('.property-select-trigger');
+    const list = customSelect.querySelector('.property-select-list');
+    const valueNode = customSelect.querySelector('.property-select-value');
+    const hiddenInput = customSelect.querySelector('input[type="hidden"]');
+
+    const close = () => {
+        customSelect.classList.remove('is-open');
+        list.hidden = true;
+        trigger.setAttribute('aria-expanded', 'false');
+    };
+
+    trigger.addEventListener('click', () => {
+        const isOpen = customSelect.classList.toggle('is-open');
+        list.hidden = !isOpen;
+        trigger.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    list.addEventListener('click', (event) => {
+        const option = event.target.closest('.property-select-option');
+        if (!option) return;
+
+        list.querySelectorAll('.property-select-option').forEach((item) => {
+            const selected = item === option;
+            item.classList.toggle('is-selected', selected);
+            item.setAttribute('aria-selected', String(selected));
+        });
+        hiddenInput.value = option.dataset.value;
+        valueNode.textContent = option.textContent;
+        close();
+    });
+
+    document.addEventListener('click', (event) => {
+        if (!customSelect.contains(event.target)) close();
+    });
+});
+
 const SERVER_NAME = document.getElementById('panel-control').dataset.server
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));

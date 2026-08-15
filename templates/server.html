@@ -44,30 +44,67 @@
             <div id="properties-container">
                 <div class="property">
                     <label for="gamemode">Gamemode</label>
-                    <select id="gamemode" onchange="updateProperty('gamemode', this.value)">
-                        <option value="survival">Survival</option>
-                        <option value="creative">Creative</option>
-                        <option value="adventure">Adventure</option>
-                        <option value="spectator">Spectator</option>
-                    </select>
+                    <div class="property-select" data-property-select>
+                        <button class="property-select-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="gamemode-listbox">
+                            <span class="property-select-value">Survival</span>
+                        </button>
+                        <ul class="property-select-list" id="gamemode-listbox" role="listbox" hidden>
+                            <li class="property-select-option is-selected" role="option" aria-selected="true" data-value="survival">Survival</li>
+                            <li class="property-select-option" role="option" aria-selected="false" data-value="creative">Creative</li>
+                            <li class="property-select-option" role="option" aria-selected="false" data-value="adventure">Adventure</li>
+                            <li class="property-select-option" role="option" aria-selected="false" data-value="spectator">Spectator</li>
+                        </ul>
+                        <input type="hidden" id="gamemode" value="survival">
+                    </div>
                 </div>
                 <div class="property">
                     <label for="difficulty">Difficulty</label>
-                    <select id="difficulty" onchange="updateProperty('difficulty', this.value)">
-                        <option value="peaceful">Peaceful</option>
-                        <option value="easy">Easy</option>
-                        <option value="normal">Normal</option>
-                        <option value="hard">Hard</option>
-                    </select>
+                    <div class="property-select" data-property-select>
+                        <button class="property-select-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="difficulty-listbox">
+                            <span class="property-select-value">Normal</span>
+                        </button>
+                        <ul class="property-select-list" id="difficulty-listbox" role="listbox" hidden>
+                            <li class="property-select-option" role="option" aria-selected="false" data-value="peaceful">Peaceful</li>
+                            <li class="property-select-option" role="option" aria-selected="false" data-value="easy">Easy</li>
+                            <li class="property-select-option is-selected" role="option" aria-selected="true" data-value="normal">Normal</li>
+                            <li class="property-select-option" role="option" aria-selected="false" data-value="hard">Hard</li>
+                        </ul>
+                        <input type="hidden" id="difficulty" value="normal">
+                    </div>
                 </div>
                 <div class="property">
                     <label for="max-players">Max Players</label>
-                    <input type="number" id="max-players" min="1" onchange="updateProperty('max-players', this.value)">
+                    <input type="number" id="max-players" min="1">
                 </div>
                 <div class="property">
-                    <label for="cracked">Cracked</label>
-                    <input type="checkbox" id="cracked" onchange="updateProperty('cracked', this.checked)">
+                    <label class="property-checkbox" for="cracked">
+                        <span>Cracked</span>
+                        <input type="checkbox" id="cracked">
+                        <span class="checkbox-mark" aria-hidden="true"></span>
+                    </label>
                 </div>
+                <div class="property">
+                    <label class="property-checkbox" for="whitelist">
+                        <span>Whitelist</span>
+                        <input type="checkbox" id="whitelist">
+                        <span class="checkbox-mark" aria-hidden="true"></span>
+                    </label>
+                </div>
+                <div class="property">
+                    <label class="property-checkbox" for="allow-flight">
+                        <span>Allow-flight</span>
+                        <input type="checkbox" id="allow-flight">
+                        <span class="checkbox-mark" aria-hidden="true"></span>
+                    </label>
+                </div>
+                <div class="property">
+                    <label class="property-checkbox" for="force-gamemode">
+                        <span>Force gamemode</span>
+                        <input type="checkbox" id="force-gamemode">
+                        <span class="checkbox-mark" aria-hidden="true"></span>
+                    </label>
+                </div>
+                <button class="btn btn-primary" onclick="updateProperties(this.parentNode)">Guardar</button>
             </div>
             <footer>Nota: tenés que reinciar tu servidor para que estas configuraciones hagan efecto</footer>
         </div>

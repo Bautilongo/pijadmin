@@ -10,7 +10,7 @@ import webbrowser
 import sys
 import requests
 import hashlib
-import pathlib
+import re
 
 def get_base_dir() -> Path:
     if getattr(sys, 'frozen', False):
@@ -123,3 +123,40 @@ def write_conf_java(server, path=None, version=None, custom_installation=False):
 
     with open(conf_path, "w", encoding="utf-8") as f:
         parser.write(f)
+
+ALLOWED_GAMEMODES = {'survival', 'creative', 'adventure', 'spectator'}
+ALLOWED_DIFFICULTIES = {'peaceful', 'easy', 'normal', 'hard'}
+
+def sanitize_value(val):
+    # Avoid line breaks in values
+    return str(val).replace('\r', '').replace('\n', '').strip()
+
+def validate_and_map(data):
+    clean_props = {}
+
+    # Gamemode
+    if 'gamemode' in data and str(data['gamemode']).lower() in ALLOWED_GAMEMODES:
+        clean_props['gamemode'] = str(data['gamemode']).lower()
+
+    # Difficulty
+    if 'difficulty' in data and str(data['difficulty']).lower() in ALLOWED_DIFFICULTIES:
+        clean_props['difficulty'] = str(data['difficulty']).lower()
+
+    # Max Players (positive integers up to 10000, a reasonable range)
+    if 'max-players' in data:
+        try:
+            players = int(data['max-players'])
+            if 1 <= players <= 10000:
+                clean_props['max-players'] = str(players)
+        except (ValueError, TypeError):
+            pass
+
+    # Whitelist (strict boolean)
+    if 'whitelist' in data:
+        clean_props['white-list'] = 'true' if data['whitelist'] is True else 'false'
+
+    # Cracked / Online-mode (inverted boolean)
+    if 'cracked' in data:
+        clean_props['online-mode'] = 'false' if data['cracked'] is True else 'true'
+
+    return clean_props

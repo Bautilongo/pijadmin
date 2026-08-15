@@ -884,6 +884,178 @@ footer {
     margin-bottom: 12px;
 }
 
+#properties-container {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 16px;
+    margin-top: 18px;
+}
+
+#properties-container .property,
+#properties-container > div:not(.property) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 48px;
+    padding: 10px 12px;
+    border: 1px solid var(--pill-border);
+    border-radius: var(--radius-sm);
+    background: var(--pill);
+}
+
+#properties-container label {
+    color: var(--text-muted);
+    font-size: 0.84rem;
+    font-weight: 600;
+}
+
+#properties-container input[type="number"] {
+    min-width: 0;
+    padding: 7px 9px;
+    border: 1px solid var(--pill-border);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text-primary);
+    font: inherit;
+    outline: none;
+    transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+#properties-container input[type="number"] {
+    width: 92px;
+}
+
+#properties-container input[type="number"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.16);
+}
+
+#properties-container .property-select {
+    position: relative;
+    min-width: 145px;
+}
+
+#properties-container .property-select-trigger {
+    position: relative;
+    width: 100%;
+    padding: 7px 30px 7px 9px;
+    border: 1px solid var(--pill-border);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text-primary);
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 500;
+    text-align: left;
+}
+
+#properties-container .property-select-trigger::after {
+    content: "";
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    width: 7px;
+    height: 7px;
+    border-right: 2px solid var(--text-muted);
+    border-bottom: 2px solid var(--text-muted);
+    transform: translateY(-65%) rotate(45deg);
+}
+
+#properties-container .property-select.is-open .property-select-trigger,
+#properties-container .property-select-trigger:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.16);
+}
+
+#properties-container .property-select-list {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 6px);
+    z-index: 20;
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+    border: 1px solid var(--pill-border);
+    border-radius: var(--radius-sm);
+    background: #1a1a1d;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45);
+}
+
+#properties-container .property-select-option {
+    padding: 8px 9px;
+    border-radius: 6px;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    cursor: pointer;
+}
+
+#properties-container .property-select-option:hover,
+#properties-container .property-select-option.is-selected {
+    background: rgba(88, 101, 242, 0.22);
+    color: var(--text-primary);
+}
+
+#properties-container .property-checkbox {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 12px;
+    color: var(--text-muted);
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+#properties-container .property-checkbox input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+#properties-container .checkbox-mark {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+    border: 1px solid var(--pill-border);
+    border-radius: 6px;
+    background: var(--surface);
+    transition: background var(--transition), border-color var(--transition), box-shadow var(--transition);
+}
+
+#properties-container .checkbox-mark::after {
+    content: "";
+    position: absolute;
+    left: 6px;
+    top: 3px;
+    width: 5px;
+    height: 9px;
+    border-right: 2px solid white;
+    border-bottom: 2px solid white;
+    transform: rotate(45deg) scale(0);
+    transition: transform var(--transition);
+}
+
+#properties-container .property-checkbox input:checked + .checkbox-mark {
+    border-color: var(--accent);
+    background: var(--accent);
+    box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.16);
+}
+
+#properties-container .property-checkbox input:checked + .checkbox-mark::after {
+    transform: rotate(45deg) scale(1);
+}
+
+#properties-container > .btn {
+    grid-column: 1 / -1;
+    justify-self: end;
+    margin-top: 4px;
+}
+
 @media (max-width: 780px) {
     body {
         padding: 14px;
@@ -943,6 +1115,14 @@ footer {
 
     .new-server-form .form-grid {
         grid-template-columns: 1fr;
+    }
+
+    #properties-container {
+        grid-template-columns: 1fr;
+    }
+
+    #properties-container > .btn {
+        width: 100%;
     }
 
     .new-server-form .form-actions {

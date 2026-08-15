@@ -130,6 +130,12 @@ def new_server():
     sfw_mode = request.cookies.get('sfw_mode', 'false').strip('"') == 'true'
     return render_template('new_server.html', sfw_mode=sfw_mode)
 
+@app.route('/update_properties', methods=['POST'])
+def update_properties():
+    properties = request.form.get('properties')
+    print(properties)
+    return {'status': 'ok'}
+
 @app.route('/api/servers/new', methods=['POST'])
 def api_new_server():
     request_dict = request.get_json()
