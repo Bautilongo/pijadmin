@@ -15,6 +15,8 @@ SERVERS_DIR = util.get_base_dir() / 'servers'
 
 def get_java_version(minecraft_version_str):
     v = tuple(int(x) for x in minecraft_version_str.split('.'))
+    if v >= (26, 0, 0):
+        return 25
     if v >= (1, 20 , 5):
         return 21
     elif v >= (1, 18):
