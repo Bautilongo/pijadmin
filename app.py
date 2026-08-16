@@ -17,6 +17,8 @@ from util import paper
 from util import vanilla
 from util import java
 
+util.environament_validate()
+
 config = ConfigParser()
 
 BASE_DIR = util.get_base_dir()
