@@ -11,6 +11,13 @@ import sys
 import requests
 import hashlib
 import re
+import platform
+import sys
+
+def environament_validate():
+    arch = platform.machine().lower()
+    if '64' not in arch:
+        print('❌ [ERROR] PIJadmin requires a 64-bit OS')
 
 def get_base_dir() -> Path:
     if getattr(sys, 'frozen', False):
