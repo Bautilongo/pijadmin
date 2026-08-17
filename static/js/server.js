@@ -310,3 +310,17 @@ socket.on('server_stopped', () => {
     statusElement.textContent = '● Servidor detenido';
     statusElement.style.color = '#ef4444';
 });
+
+async function ipConfigure() {
+    result = VanillaSwal.fire({  
+        title: 'Exponer a internet',
+        text: 'Para permitir que otros se conecten a tu servidor, necesitas exponerlo a internet. Para esto, puedes abrir los puertos de tu router o usar un servicio de túneles como playit.gg.',
+        confirmText: 'Más información',
+        showCancelButton: true,
+        cancelText: 'Cerrar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.open('https://pijadmin.xenomorphyk.one/expose', '_blank');
+        }
+    });
+}
