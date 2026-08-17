@@ -47,9 +47,10 @@ def get_server_by_name(name: str):
     software = config['server']['software']
     version = config['server']['version']
     sha = config['server']['sha']
+    ip_is_configured = config['server'].get('ip_is_configured', '0') == '1'
     if software == 'vanilla':
-        return {'software': software, 'version': version, 'sha': sha}
-    return {'software': software, 'version': version, 'build_id': config['server']['build_id']}
+        return {'software': software, 'version': version, 'sha': sha, 'ip_is_configured': ip_is_configured}
+    return {'software': software, 'version': version, 'build_id': config['server']['build_id'], 'ip_is_configured': ip_is_configured}
 
 def create_conf_file(name: str, version: str, software: str, sha: str, build_id: int):
     config['server'] = {
@@ -57,7 +58,8 @@ def create_conf_file(name: str, version: str, software: str, sha: str, build_id:
         'version': version,
         'software': software,
         'sha': sha,
-        'build_id': str(build_id)
+        'build_id': str(build_id),
+        'ip_is_configured': '0'
     }
     config['java'] = {
         'custom_installation': '0',

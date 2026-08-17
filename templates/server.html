@@ -1,6 +1,8 @@
 {% extends "nav.html" %}
 {% block head %}
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js" defer></script>
+    <script src="{{ url_for('static', filename='js/server.js') }}" defer></script>
+
 {% endblock %}
 {% block body %}
     <main class="main-content">
@@ -13,8 +15,9 @@
 
         <div class="card section" id="panel-main">
             <div class="server-option">
-                <img src="{{ url_for('static', filename='icons/login.svg') }}" alt="adress">
-                <p><span data-i18n="server.adress">Dirección IP</span> coming soon</p>
+                <img src="{{ url_for('static', filename='icons/login.svg') }}" alt="address">
+                <p><span data-i18n="server.address">Dirección IP</span></p>
+                <button id="ip-button" class="btn btn-secondary" data-i18n="server.configure" data-configured="{{ server['ip_is_configured'] }}" onclick="ipConfigure()">Configurar</button>
             </div>
             <div class="server-option">
                 <img src="{{ url_for('static', filename='icons/commit.svg') }}" alt="version">
@@ -129,5 +132,4 @@
         <h3>Necesitaremos permisos de administrador, por favor acepta la solicitud de permisos...</h3>
         <button onclick="document.getElementById('message').close()">Ok</button>
     </dialog>
-<script src="{{ url_for('static', filename='js/server.js') }}"></script>
 {% endblock %}

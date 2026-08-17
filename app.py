@@ -53,7 +53,6 @@ status: dict[str, int | float] = {}
 connected_clients = set()
 clients_lock = Lock()
 
-
 def stream_server_logs(server_name, process_obj):
     """Background thread to read Java logs without blocking Socket.IO."""
     try:
@@ -261,10 +260,6 @@ def server(server_name):
         return render_template('404.html'), 404
     sfw_mode = request.cookies.get('sfw_mode', 'false').strip('"') == 'true'
     return render_template('server.html', server=server, server_name=server_name, sfw_mode=sfw_mode)
-
-@app.route('/settings')
-def settings():
-    return render_template('settings.html')
 
 def clients_emit(evento, data, server_name):
         socketio.emit(evento, data, to=server_name)
