@@ -782,6 +782,18 @@ dialog .btn + .btn {
     transform: translateY(-1px);
 }
 
+.btn-success {
+    background: rgba(59, 165, 93, 0.15);
+    color: var(--success);
+    border: 1px solid rgba(59, 165, 93, 0.3);
+}
+
+.btn-success:hover:not(:disabled) {
+    background: rgba(59, 165, 93, 0.25);
+    border-color: var(--success);
+    transform: translateY(-1px);
+}
+
 .btn-secondary {
     background: rgba(107, 107, 114, 0.15);
     color: var(--text-primary);
