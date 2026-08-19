@@ -78,17 +78,41 @@ function getElementValue(element) {
     }
 }
 
-function updateProperties(container) {
+function updateProperties(container, button) {
     values = {}
     container.querySelectorAll(':scope input, :scope select').forEach((input) => {
         values[input.id] = getElementValue(input)
     })
 
+    button.disabled = true;
+    button.innerText = 'Guardando...';
+
     fetch('/update_properties', {
         method: 'post',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: `properties=${JSON.stringify(values)}`
+        body: `serverName=${SERVER_NAME}&properties=${JSON.stringify(values)}`
     })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'error') {
+                result = VanillaSwal.fire({
+                    title: 'Error al actualizar propiedades',
+                    text: data.message,
+                    icon: 'error',
+                    confirmText: 'Cerrar'
+                });
+            } else {
+                result = VanillaSwal.fire({
+                    title: 'Propiedades actualizadas',
+                    text: 'Las propiedades del servidor se han actualizado correctamente.',
+                    icon: 'success',
+                    confirmText: 'Cerrar'
+                });
+
+            }
+        button.disabled = false;
+        button.innerText = 'Guardar';
+        });
 }
 
 document.querySelectorAll('[data-property-select]').forEach((customSelect) => {
@@ -195,15 +219,18 @@ socket.on('server_status', (data) => {
         button.innerText = 'Apagar servidor';
         button.disabled = false;
         button.onclick = () => {
-            modal = document.getElementById('shut-down-modal')
-            modal.showModal()
-            document.getElementById('modal-yes-button').onclick = () => {
-                socket.emit('stop_server', {'serverName': SERVER_NAME})
-                modal.close()
-            }
-            document.getElementById('modal-no-button').onclick = () => {
-                modal.close()
-            }
+            result = VanillaSwal.fire({
+                title: 'Apagar servidor',
+                text: '¿Estás seguro de que deseas apagar el servidor?',
+                showCancelButton: true,
+                confirmText: 'Sí, apagar',
+                confirmButtonClass: 'btn btn-danger',
+                cancelText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    socket.emit('stop_server', { 'serverName': SERVER_NAME });
+                }
+            });
         }
         if (!consoleBox.innerText.trim() || consoleBox.innerText.includes('Esperando inicio del servidor...')) {
             consoleBox.innerText = 'Servidor iniciado. Esperando salida de consola...\n';

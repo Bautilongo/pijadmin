@@ -10,12 +10,13 @@ from configparser import ConfigParser
 import re
 import os
 import sys
-import asyncio
+import json
 
 from util import util
 from util import paper
 from util import vanilla
 from util import java
+from util import properties
 
 util.environament_validate()
 
@@ -133,8 +134,15 @@ def new_server():
 
 @app.route('/update_properties', methods=['POST'])
 def update_properties():
-    properties = request.form.get('properties')
-    print(properties)
+    properties_ = json.loads(request.form.get('properties'))
+    server_name = request.form.get('serverName')
+
+    try:
+        for key, value in properties_.items():
+            properties.set_server_property(key, value, SERVERS_DIR / ('server.' + server_name) / 'server.properties')
+    except Exception as e:
+        print(e)
+        return {'status': 'error', 'message': str(e)}
     return {'status': 'ok'}
 
 @app.route('/api/servers/new', methods=['POST'])
