@@ -1,4 +1,6 @@
-(() => {
+﻿(() => {
+  let activeModal = null;
+
   function syncBodyModalState() {
     if (document.querySelector('dialog[open]')) {
       document.body.classList.add('modal-open');
@@ -43,7 +45,7 @@
 
   function fireModal(options = {}) {
     const {
-      title = 'Confirmar acción',
+      title = 'Confirmar accion',
       text = '',
       confirmText = 'Aceptar',
       cancelText = 'Cancelar',
@@ -78,30 +80,48 @@
         cancelButton.textContent = cancelText;
       }
 
-      function cleanup() {
-        dialog.remove();
-      }
-
       async function closeWithResult(result) {
         if (settled) {
           return;
         }
+
         settled = true;
+
+        if (activeModal && activeModal.dialog === dialog) {
+          activeModal = null;
+        }
+
         await animateOut(dialog);
-        dialog.close();
+        if (dialog.open) {
+          dialog.close();
+        }
         syncBodyModalState();
-        cleanup();
+        dialog.remove();
         resolve(result);
       }
 
+      function dismiss(reason) {
+        return closeWithResult({
+          isConfirmed: false,
+          isDismissed: true,
+          dismiss: reason
+        });
+      }
+
+      if (activeModal && typeof activeModal.dismiss === 'function') {
+        activeModal.dismiss('replaced');
+      }
+
+      activeModal = { dialog, dismiss };
+
       dialog.addEventListener('cancel', (event) => {
         event.preventDefault();
-        closeWithResult({ isConfirmed: false, isDismissed: true, dismiss: 'esc' });
+        dismiss('esc');
       });
 
       dialog.addEventListener('click', (event) => {
         if (event.target === dialog && allowOutsideClick) {
-          closeWithResult({ isConfirmed: false, isDismissed: true, dismiss: 'backdrop' });
+          dismiss('backdrop');
         }
       });
 
@@ -111,7 +131,7 @@
 
       if (cancelButton) {
         cancelButton.addEventListener('click', () => {
-          closeWithResult({ isConfirmed: false, isDismissed: true, dismiss: 'cancel' });
+          dismiss('cancel');
         });
       }
 
@@ -122,5 +142,14 @@
     });
   }
 
-  window.VanillaSwal = { fire: fireModal };
+  function closeActiveModal() {
+    if (activeModal && typeof activeModal.dismiss === 'function') {
+      activeModal.dismiss('programmatic');
+    }
+  }
+
+  window.VanillaSwal = {
+    fire: fireModal,
+    close: closeActiveModal
+  };
 })();

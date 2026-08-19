@@ -1,3 +1,5 @@
+let activeModal = null;
+
 const DEFAULT_PANEL = 'panel-main';
 
 const modalStack = new Set();
@@ -90,7 +92,7 @@ function updateProperties(container, button) {
     fetch('/update_properties', {
         method: 'post',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: `serverName=${SERVER_NAME}&properties=${JSON.stringify(values)}`
+        body: `serverName=${serverName}&properties=${JSON.stringify(values)}`
     })
         .then(response => response.json())
         .then(data => {
@@ -152,7 +154,9 @@ document.querySelectorAll('[data-property-select]').forEach((customSelect) => {
     });
 });
 
-const SERVER_NAME = document.getElementById('panel-control').dataset.server
+const datasets = document.getElementById('panel-control')
+const serverName = datasets.dataset.server
+const serverVersion = datasets.dataset.version
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -203,7 +207,7 @@ window.addEventListener('popstate', (event) => {
 const socket = io();
 
 socket.on('connect', () => {
-    socket.emit('join_server_room', { serverName: SERVER_NAME });
+    socket.emit('join_server_room', { serverName: serverName });
     document.getElementById('connection-dot').classList.add('dot-connected')
 });
 
@@ -228,7 +232,7 @@ socket.on('server_status', (data) => {
                 cancelText: 'Cancelar'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    socket.emit('stop_server', { 'serverName': SERVER_NAME });
+                    socket.emit('stop_server', { 'serverName': serverName });
                 }
             });
         }
@@ -257,7 +261,7 @@ function iniciar() {
     const consoleBox = document.getElementById('console');
     consoleBox.innerText = 'Iniciando servidor...\n'; 
     const status = document.getElementById('status');
-    socket.emit('start_server', { serverName: SERVER_NAME }, (response => {
+    socket.emit('start_server', { serverName: serverName }, (response => {
         if (response.status === 'ok') {
             btn = document.getElementById('btnStart');
             btn.innerText = 'Iniciando...';  
@@ -266,26 +270,40 @@ function iniciar() {
             status.style.color = '#f59e0b';
 
         } else if (response.status === 'installation_needed') {
-            modal = document.getElementById('install')
-            modal.showModal()
-            document.getElementById('java-version').textContent = response.java_version;
-            document.getElementById('java-version').dataset.javaVersion = response.java_version;
+            result = VanillaSwal.fire({
+                title: `Para iniciar tu servidor en la ${serverVersion} debes instalar el Java SDK en su versión ${response.java_version}`,
+                showCancelButton: true,
+                confirmText: 'Instalala por mí',
+                confirmButtonClass: 'btn btn-success',
+                cancelText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    confirmInstalation(response.java_version);
+                }
+            })
         } 
         else {
-            alert('Error al iniciar ' + response.message)
+            VanillaSwal.fire({
+                title: 'Error al iniciar',
+                text: response.message,
+                showCancelButton: false,
+                confirmText: 'Cerrar',
+                confirmButtonClass: 'btn btn-secondary'
+            })
         }
     }));
 }
 
-function confirmInstalation() {
-    const modal = document.getElementById('install');
-    const javaVersion = document.getElementById('java-version').dataset.javaVersion;
-    modal.close();
-    messageModal = document.getElementById('message');
-    messageModal.showModal();
+function confirmInstalation(javaVersion) {
+    result = VanillaSwal.fire({
+        title: 'Necesitaremos permisos de administrador, por favor acepta la solicitud de permisos...',
+        showCancelButton: false,
+        confirmText: 'Ok',
+        confirmButtonClass: 'btn btn-secondary'
+    })
     const consoleBox = document.getElementById('console');
     consoleBox.innerText += 'Instalando Java...\n';
-    socket.emit('install_java', { serverName: SERVER_NAME, javaVersion: javaVersion }, (response) => {
+    socket.emit('install_java', { serverName: serverName, javaVersion: javaVersion }, (response) => {
         if (response.status === 'ok') {
             consoleBox.innerText += 'Java instalado correctamente.\n';
         } else {
@@ -298,7 +316,7 @@ function enviarComando() {
     const input = document.getElementById('cmdInput');
     if (input.value.trim() !== '') {
         const comando = input.value;
-        socket.emit('send_command', { command: comando, serverName: SERVER_NAME });
+        socket.emit('send_command', { command: comando, serverName: serverName });
         const consoleBox = document.getElementById('console');
         consoleBox.innerText += `> ${comando}\n`;
         input.value = '';
