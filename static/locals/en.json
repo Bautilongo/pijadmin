@@ -29,6 +29,7 @@
         "select_one": "Select one",
         "canel": "Cancel",
         "create_server": "Create server",
+        "creating_server": "Creating server...",
         "cannot_create_server": "Couldn't create the server",
         "unexpected_error": "An unexpected error occured.",
         "continue": "Continue",

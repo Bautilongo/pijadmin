@@ -217,6 +217,10 @@ form.addEventListener('submit', async (e) => {
   e.preventDefault();
   await translationsReady;
 
+  button = form.querySelector('button[type="submit"]');
+  button.disabled = true;
+  button.textContent = t('new_server.creating_server'); // Creando servidor...
+
   if (!hiddenSoftware.value) {
     hiddenSoftware.setCustomValidity(t('new_server.select_a_software')); // Selecciona un software para continuar.
     hiddenSoftware.reportValidity();
@@ -248,17 +252,22 @@ form.addEventListener('submit', async (e) => {
 
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
-      const modal = document.getElementById('error-modal');
-      document.getElementById('error-modal-message').innerText = body.message || t('new_server.unexpected_error'); // Ha ocurrido un error inesperado.
-      modal.showModal();
+      VanillaSwal.fire({
+        title: t('new_server.cannot_create_server'), // No se pudo crear el servidor
+        text: body.message || t('new_server.unexpected_error'), // Ha ocurrido un error inesperado.
+      })
       return;
     }
 
     window.location.href = `/server/${currentForm.name.value.trim()}`;
   } catch (err) {
-    const modal = document.getElementById('error-modal');
-    document.getElementById('error-modal-message').innerText = t('new_server.check_internet_connection'); // No se pudo contactar con el servidor. Revisa la conexión e inténtalo de nuevo.
-    modal.showModal();
+    VanillaSwal.fire({
+      title: t('new_server.cannot_create_server'), // No se pudo crear el servidor
+      text: t('new_server.check_internet_connection'), // No se pudo contactar con el servidor. Revisa la conexión e inténtalo de nuevo.
+    })
+  } finally {
+    button.disabled = false;
+    button.textContent = t('new_server.create_server'); // Crear servidor
   }
 });
 

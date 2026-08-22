@@ -43,6 +43,21 @@
     );
   }
 
+  function isBackdropClick(event, dialog) {
+    if (event.target !== dialog) {
+      return false;
+    }
+
+    const rect = dialog.getBoundingClientRect();
+    const insideDialog =
+      event.clientX >= rect.left &&
+      event.clientX <= rect.right &&
+      event.clientY >= rect.top &&
+      event.clientY <= rect.bottom;
+
+    return !insideDialog;
+  }
+
   function fireModal(options = {}) {
     const {
       title = 'Confirmar accion',
@@ -120,7 +135,7 @@
       });
 
       dialog.addEventListener('click', (event) => {
-        if (event.target === dialog && allowOutsideClick) {
+        if (allowOutsideClick && isBackdropClick(event, dialog)) {
           dismiss('backdrop');
         }
       });
@@ -153,3 +168,4 @@
     close: closeActiveModal
   };
 })();
+
