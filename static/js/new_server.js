@@ -197,16 +197,28 @@ HTMLDialogElement.prototype.close = function () {
   return nativeClose.call(this);
 };
 
-let currentTranslations = fetch(`/static/locals/${localStorage.getItem('pijadmin_lang') || 'es'}`);
-function t(keyPath) {
-  return keyPath.split('.').reduce((prev, curr) => (prev ? prev[curr] : null), currentTranslations || keyPath)
+let currentTranslations = {};
+
+async function loadTranslations() {
+  const lang = localStorage.getItem('pijadmin_lang') || 'es';
+  const res = await fetch(`/static/locals/${lang}.json`);
+  currentTranslations = await res.json();
 }
+
+function t(keyPath) {
+  return keyPath.split('.').reduce((prev, curr) => (prev ? prev[curr] : null), currentTranslations) ?? keyPath;
+}
+
+const translationsReady = loadTranslations().catch(() => {
+  currentTranslations = {};
+});
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
+  await translationsReady;
 
   if (!hiddenSoftware.value) {
-    hiddenSoftware.setCustomValidity(t('new_server.seelct_a_software')); // Selecciona un software para continuar.
+    hiddenSoftware.setCustomValidity(t('new_server.select_a_software')); // Selecciona un software para continuar.
     hiddenSoftware.reportValidity();
     openSelect();
     return;
@@ -215,9 +227,10 @@ form.addEventListener('submit', async (e) => {
   const currentForm = e.currentTarget;
   let software = currentForm.software.value
   if (software == 'spigot') {
-    const modal = document.getElementById('error-modal');
-    document.getElementById('error-modal-message').innerText = t('new_server.spigot'); // No se puede usar spigot: es malísimo!
-    modal.showModal();
+    VanillaSwal.fire({
+      title: t('new_server.cannot_create_server'), // No se pudo crear el servidor
+      text: t('new_server.spigot'), // No se puede usar spigot: es malísimo!
+    });
     return;
   }
   const data = {
@@ -244,7 +257,7 @@ form.addEventListener('submit', async (e) => {
     window.location.href = `/server/${currentForm.name.value.trim()}`;
   } catch (err) {
     const modal = document.getElementById('error-modal');
-    document.getElementById('error-modal-message').innerText = t('new_Server.check_internet_connection'); // No se pudo contactar con el servidor. Revisa la conexión e inténtalo de nuevo.
+    document.getElementById('error-modal-message').innerText = t('new_server.check_internet_connection'); // No se pudo contactar con el servidor. Revisa la conexión e inténtalo de nuevo.
     modal.showModal();
   }
 });
