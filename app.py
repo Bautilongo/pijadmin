@@ -261,6 +261,11 @@ def api_delete_server():
         return '', 500
     return '', 200
 
+@app.route('/api/servers/change_version', methods=['POST'])
+def api_change_version():
+    print(request.get_json())
+    return {'status': 'ok'}
+
 @app.route('/server/<server_name>')
 def server(server_name):
     server = util.get_server_by_name(server_name)

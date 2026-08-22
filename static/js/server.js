@@ -369,3 +369,37 @@ async function ipConfigure() {
         }
     });
 }
+
+function formatOptions(arr) { 
+    for (let i = 0; i < arr.length; i++) {
+        arr[i] = { value: arr[i], label: arr[i] };
+    }
+    return arr;
+}
+
+document.getElementById("change-version-button").addEventListener("click", async () => {await changeVersion()});
+// document.getElementById("change-software-button").addEventListener("click", await changeSoftware());
+
+async function changeVersion() {
+    const paperVersions = await getPaperVersions();
+    const result = await VanillaSwal.fire({
+    type: 'select',
+    title: 'Cambiar versión',
+    text: 'Selecciona la versión a la que deseas cambiar tu servidor:',
+    selectLabel: 'Versión',
+    selectOptions: formatOptions(paperVersions),
+    selectRequired: true,
+    confirmText: 'Cambiar',
+    cancelText: 'Cancelar'
+    });
+    
+    if (result.isConfirmed) {
+        const newVersion = result.value;
+        console.log({ serverName, newVersion });
+        const res = await fetch('/api/servers/change_version', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ serverName, newVersion })
+        });
+    }
+}
