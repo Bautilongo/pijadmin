@@ -29,12 +29,14 @@
         "select_one": "Selecciona uno",
         "canel": "Cancelar",
         "create_server": "Crear servidor",
+        "creating_server": "Creando servidor...",
         "cannot_create_server": "No se pudo crear el servidor",
         "unexpected_error": "Ha ocurrido un error inesperado.",
         "continue": "Continuar",
         "select_a_software": "Selecciona un software para continuar",
         "spigot": "No se puede usar spigot: es malísimo!",
-        "check_internet_connection": "No se pudo contactar con el servidor. Revisa la conexión e inténtalo de nuevo."
+        "check_internet_connection": "No se pudo contactar con el servidor. Revisa la conexión e inténtalo de nuevo.",
+        "configure": "Configurar"
     },
     "server": {
         "control": "Control del servidor",

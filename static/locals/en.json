@@ -35,7 +35,8 @@
         "continue": "Continue",
         "select_a_software": "Select a software to continue",
         "spigot": "Cannot use spigot: it's crap!",
-        "check_internet_connection": "Couldn't connect to the server. Check your internet connection and try again."
+        "check_internet_connection": "Couldn't connect to the server. Check your internet connection and try again.",
+        "configure": "Configure"
     },
     "server": {
         "control": "Server control",
