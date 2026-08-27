@@ -17,6 +17,7 @@ from util import paper
 from util import vanilla
 from util import java
 from util import properties
+from util.err import ServerCreationError
 
 util.environament_validate()
 
@@ -151,102 +152,24 @@ def api_new_server():
     name = request_dict['name'].lower()
     version = request_dict['version']
     software = request_dict['software']
-    if not re.fullmatch(r'^[A-Za-z0-9_-]{3,20}$', name):
+
+    try:
+        util.new_server(name, version, software)
+    except Exception as e:
+        print(e)
+        if isinstance(e, ServerCreationError):
+            return {
+                'ok': 'false',
+                'error': e.error,
+                'message': e.args[0]
+            }, e.code
         return {
             'ok': 'false',
-            'error': 'invalid_name',
-            'message': "The server's name is invalid"
-        }, 400
-    if not re.fullmatch(r'^(1|26)\.\d+(\.\d+)?$', version):
-        return {
-            'ok': 'false',
-            'error': 'invalid_version',
-            'message': 'The passed version is invalid'
-        }, 400
-    if not software in ['vanilla', 'paper', 'spigot', 'forge', 'neoforge', 'fabric']:
-        return {
-            'ok': 'false',
-            'error': 'invalid_software',
-            'message': 'The passed software is invalid'
-        }, 400
-
-    if software == 'vanilla':
-        result = vanilla.create_server(name, version)
-        if len(result) == 40:
-            util.create_conf_file(name, version, software='vanilla', sha=result, build_id=0)
-            return {
-                'ok': 'true',
-                'message': 'created'
-            }, 201
-        if 'duplicated' in result.lower():
-            return {
-                'ok': 'false',
-                'error': 'duplicated_name',
-                'message': "Server's name is duplicated!"
-            }, 409
-        if 'version' in result.lower():
-            return {
-                'ok': 'false',
-                'error': 'invalid_version',
-                'message': 'The passed version is invalid'
-            }, 400
-        if 'mojang' in result.lower():
-            return {
-                'ok': 'false',
-                'error': 'mojang_error',
-                'message': 'Mojang servers are unavailable, try again later'
-            }, 502
-        else:
-            return {
-                'ok': 'false',
-                'error': 'unexpected_error',
-                'message': 'An unexpected error occured, try again later or contact a developer'
-            }, 500
-
-    elif software == 'paper':
-        result = paper.create_server(name, version)
-        if len(result[0]) == 64:
-            util.create_conf_file(name, version, software='paper', sha=result[0], build_id=result[1]) # type: ignore
-            return {
-                'ok': 'true',
-                'message': 'created'
-            }, 201
-        if 'duplicated' in result.lower(): # type: ignore
-            return {
-                'ok': 'false',
-                'error': 'duplicated_name',
-                'message': "Server's name is duplicated!"
-            }, 409
-        if 'version' in result.lower(): # type: ignore
-            return {
-                'ok': 'false',
-                'error': 'invalid_version',
-                'message': 'The passed version is invalid'
-            }, 400
-        if 'paper' in result.lower(): # type: ignore
-            return {
-                'ok': 'false',
-                'error': 'paper_error',
-                'message': 'Paper servers are unavailable, try again later'
-            }, 502
-        else:
-            return {
-                'ok': 'false',
-                'error': 'unexpected_error',
-                'message': 'An unexpected error occured, try again later or contact a developer'
-            }, 500
-
-    elif software == 'spigot':
-        pass
-    elif software == 'forge':
-        pass
-    elif software == 'neoforge':
-        pass
-    elif software == 'fabric':
-        pass
-
+            'error': 'server_creation_failed',
+            'message': str(e)
+        }, 500
     return {
-        'ok': 'false',
+        'ok': 'true',
         'error': 'invalid_software',
         'message': 'The passed software is invalid'
     }, 400
@@ -263,7 +186,12 @@ def api_delete_server():
 
 @app.route('/api/servers/change_version', methods=['POST'])
 def api_change_version():
-    print(request.get_json())
+    data = request.get_json()
+    try:
+        stop_server({'serverName': data['serverName']})
+    except Exception as e:
+        return {'status': 'error', 'message': e}, 500
+    
     return {'status': 'ok'}
 
 @app.route('/server/<server_name>')

@@ -14,34 +14,15 @@ def new_server(name, version, software):
         result = vanilla.create_server(name, version)
         if len(result) == 40:
             util.create_conf_file(name, version, software='vanilla', sha=result, build_id=0)
-            return {
-                'ok': 'true',
-                'message': 'created'
-            }, 201
+            return 1
         if 'duplicated' in result.lower():
-            return {
-                'ok': 'false',
-                'error': 'duplicated_name',
-                'message': "Server's name is duplicated!"
-            }, 409
+            raise ServerCreationError('duplicated_name', "Server's name is duplicated!", 409)
         if 'version' in result.lower():
-            return {
-                'ok': 'false',
-                'error': 'invalid_version',
-                'message': 'The passed version is invalid'
-            }, 400
+            raise ServerCreationError('invalid_version', 'The passed version is invalid', 400)
         if 'mojang' in result.lower():
-            return {
-                'ok': 'false',
-                'error': 'mojang_error',
-                'message': 'Mojang servers are unavailable, try again later'
-            }, 502
+            raise ServerCreationError('mojang_error', 'Mojang servers are unavailable, try again later', 502)
         else:
-            return {
-                'ok': 'false',
-                'error': 'unexpected_error',
-                'message': 'An unexpected error occured, try again later or contact a developer'
-            }, 500
+            raise ServerCreationError('unexpected_error', 'An unexpected error occured, try again later or contact a developer', 500)
 
     elif software == 'paper':
         try:
@@ -50,16 +31,9 @@ def new_server(name, version, software):
             pass
         if len(result[0]) == 64:
             util.create_conf_file(name, version, software='paper', sha=result[0], build_id=result[1]) # type: ignore
-            return {
-                'ok': 'true',
-                'message': 'created'
-            }, 201
+            return 1
         if 'duplicated' in result.lower(): # type: ignore
-            return {
-                'ok': 'false',
-                'error': 'duplicated_name',
-                'message': "Server's name is duplicated!"
-            }, 409
+            raise ServerCreationError('duplicated_name', "Server's name is duplicated!", 409)
         if 'version' in result.lower(): # type: ignore
             return {
                 'ok': 'false',
