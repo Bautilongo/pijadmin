@@ -118,6 +118,11 @@ def check_sha256(path: Path, expected: str) -> bool:
 
     return sha.hexdigest().lower() == expected.lower()
 
+def check_sha1(path: Path, expected: str) -> bool:
+    with path.open('rb') as f:
+        digest = hashlib.file_digest(f, 'sha1')
+    return digest.hexdigest().lower() == expected.lower()
+
 def write_conf_java(server, path=None, version=None, custom_installation=False):
     conf_path = SERVERS_DIR / ("server." + server) / ".conf"
     parser = ConfigParser()
