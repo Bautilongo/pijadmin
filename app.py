@@ -149,12 +149,12 @@ def update_properties():
 @app.route('/api/servers/new', methods=['POST'])
 def api_new_server():
     request_dict = request.get_json()
-    name = request_dict['name'].lower()
-    version = request_dict['version']
-    software = request_dict['software']
+    name = request_dict.get('name', '').lower()
+    version = request_dict.get('version', '')
+    software = request_dict.get('software', '').lower()
 
     try:
-        util.new_server(name, version, software)
+        server.new_server(name, version, software)
     except Exception as e:
         print(e)
         if isinstance(e, ServerCreationError):
