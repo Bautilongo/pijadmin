@@ -41,8 +41,8 @@ def get_lastest_build(v:str, *, download:bool=False):
     return download_url
 
 def create_server(name:str, version:str):
+    target = SERVERS_DIR / ('server.' + name) / 'server.jar'
     try:
-        target = SERVERS_DIR / ('server.' + name) / 'server.jar'
         try:
             target.parent.mkdir(parents=True)
         except FileExistsError:
