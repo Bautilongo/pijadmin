@@ -21,12 +21,12 @@
             </div>
             <div class="server-option">
                 <img src="{{ url_for('static', filename='icons/commit.svg') }}" alt="version">
-                <p><span data-i18n="server.version">Versión</span> {{server['version']}}</p>
+                <p><span data-i18n="server.version">Versión</span> <span id="version">{{server['version']}}</span></p>
                 <button id="change-version-button" class="btn btn-secondary" data-i18n="server.change">Cambiar</button>
             </div>
             <div class="server-option">
                 <img src="{{ url_for('static', filename='icons/software.svg') }}" alt="software">
-                <p><span data-i18n="server.software">Software</span> {{server['software'].capitalize()}}</p>
+                <p><span data-i18n="server.software">Software</span> <span id="software">{{server['software'].capitalize()}}</span></p>
                 <button id="change-software-button" class="btn btn-secondary" data-i18n="server.change">Cambiar</button>
             </div>
         </div>
