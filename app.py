@@ -204,6 +204,7 @@ def api_change_software():
         stop_server({'serverName': data['serverName']})
         s.change_server_software(data['serverName'], data['newSoftware'])
     except ServerCreationError as e:
+        print(e)
         return {'status': 'error', 'message': e.args[0]}, e.code
     except Exception as e:
         return {'status': 'error', 'message': str(e)}, 500
