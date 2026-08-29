@@ -410,6 +410,7 @@ async function changeVersion() {
                 confirmText: 'Cerrar',
                 showCancelButton: false
             });
+            document.getElementById('version').textContent = newVersion;
         } else {
             VanillaSwal.fire({
                 title: 'Error al cambiar versión',
@@ -451,6 +452,7 @@ async function changeSoftware() {
                 confirmText: 'Cerrar',
                 showCancelButton: false
             });
+            document.getElementById('software').textContent = newSoftware.charAt(0).toUpperCase() + newSoftware.slice(1);
         } else {
             VanillaSwal.fire({
                 title: 'Error al cambiar software',
