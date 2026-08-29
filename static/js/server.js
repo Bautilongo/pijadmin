@@ -157,6 +157,7 @@ document.querySelectorAll('[data-property-select]').forEach((customSelect) => {
 const datasets = document.getElementById('panel-control')
 const serverName = datasets.dataset.server
 const serverVersion = datasets.dataset.version
+const serverSoftware = datasets.dataset.software
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -377,6 +378,17 @@ function formatOptions(arr) {
     return arr;
 }
 
+function formatSoftwareOptions(arr) {
+    for (let i = 0; i < arr.length; i++) {
+        arr[i] = {
+            value: arr[i],
+            label: arr[i].charAt(0).toUpperCase() + arr[i].slice(1),
+            disabled: arr[i] === serverSoftware
+        };
+    }
+    return arr;
+}
+
 document.getElementById("change-version-button").addEventListener("click", async () => {await changeVersion()});
 document.getElementById("change-software-button").addEventListener("click", async () => {await changeSoftware()});
 
@@ -430,7 +442,7 @@ async function changeSoftware() {
         title: 'Cambiar software',
         text: 'Selecciona el software al que deseas cambiar tu servidor:',
         selectLabel: 'Software',
-        selectOptions: formatOptions(softwareOptions),
+        selectOptions: formatSoftwareOptions(softwareOptions),
         selectRequired: true,
         confirmText: 'Cambiar',
         cancelText: 'Cancelar'

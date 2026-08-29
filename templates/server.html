@@ -6,7 +6,7 @@
 {% endblock %}
 {% block body %}
     <main class="main-content">
-        <div class="card" id="panel-control" data-server="{{ server_name }}" data-version="{{ server['version'] }}">
+        <div class="card" id="panel-control" data-server="{{ server_name }}" data-version="{{ server['version'] }}" data-software="{{ server['software'] }}">
             <h2 data-i18n="server.control">Control del servidor</h2>
             <button id="btnStart" onclick="iniciar()" data-i18n="server.start">Encender Servidor</button>
             <span id="status" data-i18n="server.disconnected">● Servidor apagado</span>
