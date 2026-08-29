@@ -44,31 +44,31 @@ def new_server(name, version, software):
 
     if software == 'vanilla':
         result = create_server(name, version, 'v')
-        if len(result) == 40:
-            util.create_conf_file(name, version, software='vanilla', sha=result, build_id=0)
+        sha = result[0]
+        message = str(result)
+        if len(sha) == 40:
+            util.create_conf_file(name, version, software='vanilla', sha=sha, build_id=0)
             return 1
-        if 'duplicated' in result.lower():
+        if 'duplicated' in message.lower():
             raise ServerCreationError('duplicated_name', "Server's name is duplicated!", 409)
-        if 'version' in result.lower():
+        if 'version' in message.lower():
             raise ServerCreationError('invalid_version', 'The passed version is invalid', 400)
-        if 'mojang' in result.lower():
+        if 'mojang' in message.lower():
             raise ServerCreationError('mojang_error', 'Mojang servers are unavailable, try again later', 502)
         else:
             raise ServerCreationError('unexpected_error', 'An unexpected error occured, try again later or contact a developer', 500)
 
     elif software == 'paper':
-        try:
-            result = create_server(name, version, 'p')
-        except Exception as e:
-            raise ServerCreationError('paper_error', 'Paper servers are unavailable, try again later', 502)
+        result = create_server(name, version, 'p')
         if len(result[0]) == 64:
             util.create_conf_file(name, version, software='paper', sha=result[0], build_id=result[1]) # type: ignore
             return 1
-        if 'duplicated' in result.lower(): # type: ignore
+        message = str(result)
+        if 'duplicated' in message.lower(): # type: ignore
             raise ServerCreationError('duplicated_name', "Server's name is duplicated!", 409)
-        if 'version' in result.lower(): # type: ignore
+        if 'version' in message.lower(): # type: ignore
             raise ServerCreationError('invalid_version', 'The passed version is invalid', 400)
-        if 'paper' in result.lower(): # type: ignore
+        if 'paper' in message.lower(): # type: ignore
             raise ServerCreationError('paper_error', 'Paper servers are unavailable, try again later', 502)
         else:
             raise ServerCreationError('unexpected_error', 'An unexpected error occured, try again later or contact a developer', 500)
@@ -85,7 +85,7 @@ def change_server_version(server_name, new_version):
         software = config['server']['software']
     with tempfile.TemporaryDirectory() as tmpdir:
         try:
-            snapshot = server_dir.with_suffix('.snapshot')
+            snapshot = Path(tmpdir) / 'snapshot'
             shutil.copytree(server_dir, snapshot)
 
             if software == 'vanilla':
@@ -121,7 +121,7 @@ def change_server_software(server_name, new_software):
         version = config['server']['version']
     with tempfile.TemporaryDirectory() as tmpdir:
         try:
-            snapshot = server_dir.with_suffix('.snapshot')
+            snapshot = Path(tmpdir) / 'snapshot'
             shutil.copytree(server_dir, snapshot)
 
             if new_software == 'vanilla':
@@ -138,8 +138,13 @@ def change_server_software(server_name, new_software):
                 if new_software == 'paper':
                     config['server']['sha'] = r[1] # type: ignore
                     config['server']['build_id'] = str(r[2]) # type: ignore
+                elif new_software == 'vanilla':
+                    config['server']['sha'] = r[1] # type: ignore
+                    config['server']['build_id'] = ''
+                config['server']['software'] = new_software
                 f.write('\n')
                 config.write(f)
+                return 1
         except Exception:
             shutil.rmtree(server_dir)
             shutil.copytree(snapshot, server_dir)

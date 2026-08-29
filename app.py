@@ -15,6 +15,7 @@ import json
 from util import util
 from util import paper
 from util import vanilla
+from util import server as s
 from util import java
 from util import properties
 from util.err import ServerCreationError
@@ -152,9 +153,8 @@ def api_new_server():
     name = request_dict.get('name', '').lower()
     version = request_dict.get('version', '')
     software = request_dict.get('software', '').lower()
-
     try:
-        server.new_server(name, version, software)
+        s.new_server(name, version, software)
     except Exception as e:
         print(e)
         if isinstance(e, ServerCreationError):
@@ -170,9 +170,8 @@ def api_new_server():
         }, 500
     return {
         'ok': 'true',
-        'error': 'invalid_software',
-        'message': 'The passed software is invalid'
-    }, 400
+        'message': 'Server created successfully'
+    }, 200
 
 @app.route('/api/servers/delete', methods=['POST'])
 def api_delete_server():
@@ -189,9 +188,25 @@ def api_change_version():
     data = request.get_json()
     try:
         stop_server({'serverName': data['serverName']})
+        s.change_server_version(data['serverName'], data['newVersion'])
+    except ServerCreationError as e:
+        print(e)
+        return {'status': 'error', 'message': e.args[0]}, e.code
     except Exception as e:
-        return {'status': 'error', 'message': e}, 500
-    
+        print(e)
+        return {'status': 'error', 'message': str(e)}, 500
+    return {'status': 'ok'}
+
+@app.route('/api/servers/change_software', methods=['POST'])
+def api_change_software():
+    data = request.get_json()
+    try:
+        stop_server({'serverName': data['serverName']})
+        s.change_server_software(data['serverName'], data['newSoftware'])
+    except ServerCreationError as e:
+        return {'status': 'error', 'message': e.args[0]}, e.code
+    except Exception as e:
+        return {'status': 'error', 'message': str(e)}, 500
     return {'status': 'ok'}
 
 @app.route('/server/<server_name>')

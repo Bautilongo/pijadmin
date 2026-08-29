@@ -378,7 +378,7 @@ function formatOptions(arr) {
 }
 
 document.getElementById("change-version-button").addEventListener("click", async () => {await changeVersion()});
-// document.getElementById("change-software-button").addEventListener("click", await changeSoftware());
+document.getElementById("change-software-button").addEventListener("click", async () => {await changeSoftware()});
 
 async function changeVersion() {
     const paperVersions = await getPaperVersions();
@@ -401,5 +401,64 @@ async function changeVersion() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ serverName, newVersion })
         });
+        const data = await res.json();
+        if (data.status === 'ok') {
+            VanillaSwal.fire({
+                title: 'Versión cambiada',
+                text: `La versión del servidor se ha cambiado a ${newVersion}.`,
+                icon: 'success',
+                confirmText: 'Cerrar',
+                showCancelButton: false
+            });
+        } else {
+            VanillaSwal.fire({
+                title: 'Error al cambiar versión',
+                text: data.message,
+                icon: 'error',
+                confirmText: 'Cerrar',
+                showCancelButton: false
+            });
+        }
+    }
+}
+
+async function changeSoftware() {
+    const softwareOptions = ['vanilla', 'paper'];
+    const result = await VanillaSwal.fire({
+        type: 'select',
+        title: 'Cambiar software',
+        text: 'Selecciona el software al que deseas cambiar tu servidor:',
+        selectLabel: 'Software',
+        selectOptions: formatOptions(softwareOptions),
+        selectRequired: true,
+        confirmText: 'Cambiar',
+        cancelText: 'Cancelar'
+    });
+    if (result.isConfirmed) {
+        const newSoftware = result.value;
+        console.log({ serverName, newSoftware });
+        const res = await fetch('/api/servers/change_software', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ serverName, newSoftware })
+        });
+        const data = await res.json();
+        if (data.status === 'ok') {
+            VanillaSwal.fire({
+                title: 'Software cambiado',
+                text: `El software del servidor se ha cambiado a ${newSoftware}.`,
+                icon: 'success',
+                confirmText: 'Cerrar',
+                showCancelButton: false
+            });
+        } else {
+            VanillaSwal.fire({
+                title: 'Error al cambiar software',
+                text: data.message,
+                icon: 'error',
+                confirmText: 'Cerrar',
+                showCancelButton: false
+            });
+        }
     }
 }
