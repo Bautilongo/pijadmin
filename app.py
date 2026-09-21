@@ -216,10 +216,10 @@ def new_server():
 
 @app.route('/update_properties', methods=['POST'])
 def update_properties():
-    properties_ = json.loads(request.form.get('properties'))
-    properties_ = properties.validate_and_map(properties_)
+    properties_ = properties.validate_and_map(json.loads(request.form.get('properties')))
+    print(properties_)
     server_name = request.form.get('serverName')
-
+    
     try:
         for key, value in properties_.items():
             properties.set_server_property(key, value, SERVERS_DIR / ('server.' + server_name) / 'server.properties')
