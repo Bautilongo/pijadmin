@@ -34,15 +34,12 @@ def set_server_property(key, value, filepath='server.properties'):
 def validate_and_map(data):
     clean_props = {}
 
-    # Gamemode
-    if 'gamemode' in data and str(data['gamemode']).lower() in ALLOWED_GAMEMODES:
+    if 'gamemode' in data:
         clean_props['gamemode'] = str(data['gamemode']).lower()
 
-    # Difficulty
-    if 'difficulty' in data and str(data['difficulty']).lower() in ALLOWED_DIFFICULTIES:
+    if 'difficulty' in data:
         clean_props['difficulty'] = str(data['difficulty']).lower()
 
-    # Max Players (positive integers up to 10000, a reasonable range)
     if 'max-players' in data:
         try:
             players = int(data['max-players'])
@@ -51,12 +48,16 @@ def validate_and_map(data):
         except (ValueError, TypeError):
             pass
 
-    # Whitelist (strict boolean)
     if 'whitelist' in data:
         clean_props['white-list'] = 'true' if data['whitelist'] is True else 'false'
 
-    # Cracked / Online-mode (inverted boolean)
     if 'cracked' in data:
         clean_props['online-mode'] = 'false' if data['cracked'] is True else 'true'
+
+    if 'hardcore' in data:
+        clean_props['hardcore'] = 'true' if data['hardcore'] is True else 'false'
+    if 'force-gamemode' in data:
+        clean_props['force-gamemode'] = 'true' if data['force-gamemode'] is True else 'false'
+        
 
     return clean_props
