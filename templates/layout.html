@@ -1,16 +1,21 @@
 <!DOCTYPE html>
-<html>
+<html lang="{{ lang_code }}">
 <head>
     <title>PIJadmin</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=menu" />
+    <script>
+        window.APP_LANG = {{ lang_code | tojson }};
+        window.I18N = {{ translations_json | safe }};
+    </script>
     <script src="{{ url_for('static', filename='js/i18n.js') }}" defer></script>
     <script src="/static/js/modal.js" defer></script>
     {% block head %}
     {% endblock %}
 </head>
 <body>
-    <a class="project-identity" href="/index" aria-label="Ir al inicio de PIJadmin">
+    <a class="project-identity" href="{{ url_for('pages.index') }}" aria-label="Ir al inicio de PIJadmin">
+
         {% if not sfw_mode %}
         <img class="project-identity-logo" src="{{ url_for('static', filename='icons/logo.svg') }}" alt="PIJadmin">
         {% else %}

@@ -197,25 +197,8 @@ HTMLDialogElement.prototype.close = function () {
   return nativeClose.call(this);
 };
 
-let currentTranslations = {};
-
-async function loadTranslations() {
-  const lang = localStorage.getItem('pijadmin_lang') || 'es';
-  const res = await fetch(`/static/locals/${lang}.json`);
-  currentTranslations = await res.json();
-}
-
-function t(keyPath) {
-  return keyPath.split('.').reduce((prev, curr) => (prev ? prev[curr] : null), currentTranslations) ?? keyPath;
-}
-
-const translationsReady = loadTranslations().catch(() => {
-  currentTranslations = {};
-});
-
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
-  await translationsReady;
 
   button = form.querySelector('button[type="submit"]');
   button.disabled = true;
@@ -259,7 +242,7 @@ form.addEventListener('submit', async (e) => {
       return;
     }
 
-    window.location.href = `/server/${currentForm.name.value.trim()}`;
+    window.location.href = `/${window.APP_LANG}/server/${currentForm.name.value.trim()}`;
   } catch (err) {
     VanillaSwal.fire({
       title: t('new_server.cannot_create_server'), // No se pudo crear el servidor
@@ -269,8 +252,4 @@ form.addEventListener('submit', async (e) => {
     button.disabled = false;
     button.textContent = t('new_server.create_server'); // Crear servidor
   }
-});
-
-document.getElementById('error-modal-button').addEventListener('click', () => {
-  document.getElementById('error-modal').close();
 });

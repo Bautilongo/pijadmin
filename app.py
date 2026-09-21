@@ -1,6 +1,6 @@
 import engineio.async_drivers.threading
 
-from flask import Flask, make_response, render_template, request, url_for, redirect
+from flask import Flask, Blueprint, g, make_response, render_template, request, url_for, redirect
 from flask_socketio import SocketIO, join_room, leave_room
 import subprocess
 import psutil
@@ -18,6 +18,7 @@ from util import vanilla
 from util import server as s
 from util import java
 from util import properties
+from util import i18n
 from util.err import ServerCreationError
 
 util.environament_validate()
@@ -39,6 +40,84 @@ if getattr(sys, 'frozen', False):
 else:
     app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True  # picks up template edits without a debug reloader
+
+LANG_COOKIE = 'pijadmin_lang'
+
+# All page (HTML-rendering) routes live under this blueprint so every page URL
+# carries an explicit /<lang_code>/ prefix, e.g. /es/server/asd or /en/server/asd.
+pages = Blueprint('pages', __name__, url_prefix='/<lang_code>')
+
+
+@app.before_request
+def default_lang():
+    # Fallback for non-blueprint routes (API, sockets) hit before pages.url_value_preprocessor runs.
+    if not hasattr(g, 'lang'):
+        g.lang = i18n.resolve_language(request.cookies.get(LANG_COOKIE))
+
+
+@app.after_request
+def remember_lang(response):
+    lang = getattr(g, 'lang', None)
+    if lang:
+        response.set_cookie(LANG_COOKIE, lang, max_age=30 * 24 * 60 * 60)
+    return response
+
+
+@app.context_processor
+def inject_i18n():
+    lang = getattr(g, 'lang', i18n.DEFAULT_LANGUAGE)
+    return {
+        't': lambda key_path: i18n.translate(lang, key_path),
+        'lang_code': lang,
+        'translations_json': json.dumps(i18n.load_translations(lang)),
+        'supported_languages': i18n.SUPPORTED_LANGUAGES
+    }
+
+
+@pages.url_value_preprocessor
+def pull_lang_code(endpoint, values):
+    lang_code = values.pop('lang_code', None) if values else None
+    g.lang = i18n.resolve_language(lang_code)
+
+
+@pages.url_defaults
+def add_lang_code(endpoint, values):
+    if 'lang_code' not in values:
+        values['lang_code'] = getattr(g, 'lang', i18n.DEFAULT_LANGUAGE)
+
+
+def detect_lang():
+    lang = request.cookies.get(LANG_COOKIE)
+    if lang not in i18n.SUPPORTED_LANGUAGES:
+        lang = request.accept_languages.best_match(i18n.SUPPORTED_LANGUAGES) or i18n.DEFAULT_LANGUAGE
+    return lang
+
+
+@app.route('/')
+def root_redirect():
+    return redirect(url_for('pages.index', lang_code=detect_lang()))
+
+
+@app.route('/index')
+def index_redirect():
+    return redirect(url_for('pages.index', lang_code=detect_lang()))
+
+
+@app.route('/server')
+def server_redirect_no_lang():
+    return redirect(url_for('pages.index', lang_code=detect_lang()))
+
+
+@app.route('/server/new')
+def new_server_redirect():
+    return redirect(url_for('pages.new_server', lang_code=detect_lang()))
+
+
+@app.route('/server/<server_name>')
+def server_redirect_lang(server_name):
+    return redirect(url_for('pages.server', lang_code=detect_lang(), server_name=server_name))
+
+
 socketio = SocketIO(
     app,
     cors_allowed_origins="*",
@@ -81,6 +160,7 @@ def stream_server_logs(server_name, process_obj):
 def server_ready(server_name, process_obj, time):
     status[process_obj.pid] = 1
     clients_emit('server_ready', {'time': time}, server_name)
+    clients_emit('server_status', {'status': status[process_obj.pid]}, server_name)
 
 def transmitir_metricas(server_name, process_obj):
     """Hilo de fondo para medir uso de RAM y CPU."""
@@ -115,21 +195,21 @@ def set_sfw_mode():
     response.set_cookie('sfw_mode', sfw_mode, max_age=30*24*60*60)
     return response
 
-@app.route('/')
+@pages.route('/')
 def index():
     servers = search_servers()
     sfw_mode = request.cookies.get('sfw_mode', 'false').strip('"') == 'true'
     return render_template('index.html', servers=servers, sfw_mode=sfw_mode)
 
-@app.route('/index')
+@pages.route('/index')
 def index_alias():
     return index()
 
-@app.route('/server')
+@pages.route('/server')
 def server_redirect():
-    return redirect(url_for('index'))
+    return redirect(url_for('pages.index'))
 
-@app.route('/server/new')
+@pages.route('/server/new')
 def new_server():
     sfw_mode = request.cookies.get('sfw_mode', 'false').strip('"') == 'true'
     return render_template('new_server.html', sfw_mode=sfw_mode)
@@ -137,6 +217,7 @@ def new_server():
 @app.route('/update_properties', methods=['POST'])
 def update_properties():
     properties_ = json.loads(request.form.get('properties'))
+    properties_ = properties.validate_and_map(properties_)
     server_name = request.form.get('serverName')
 
     try:
@@ -210,13 +291,15 @@ def api_change_software():
         return {'status': 'error', 'message': str(e)}, 500
     return {'status': 'ok'}
 
-@app.route('/server/<server_name>')
+@pages.route('/server/<server_name>')
 def server(server_name):
     server = util.get_server_by_name(server_name)
     if not server:
         return render_template('404.html'), 404
     sfw_mode = request.cookies.get('sfw_mode', 'false').strip('"') == 'true'
     return render_template('server.html', server=server, server_name=server_name, sfw_mode=sfw_mode)
+
+app.register_blueprint(pages)
 
 def clients_emit(evento, data, server_name):
         socketio.emit(evento, data, to=server_name)

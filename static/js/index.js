@@ -17,31 +17,38 @@ HTMLDialogElement.prototype.close = function () {
 };
 
 function serverCreate() {
-    window.location.href = '/server/new';
+    window.location.href = `/${window.APP_LANG}/server/new`;
 }
 
 function configure(button) {
     const serverName = button.dataset.server;
-    window.location.href = `/server/${serverName}`
+    window.location.href = `/${window.APP_LANG}/server/${serverName}`;
 }
 
 async function confirmDel(button) {
-    document.getElementById('delete-modal-button').dataset.server = button.dataset.server
-    document.getElementById('confirmation-modal').showModal();
+    const serverName = button.dataset.server;
+    const result = await VanillaSwal.fire({
+        title: t('index.delete_confirm'),
+        showCancelButton: true,
+        confirmText: t('index.delete_yes'),
+        confirmButtonClass: 'btn btn-danger',
+        cancelText: t('index.delete_cancel')
+    });
+
+    if (result.isConfirmed) {
+        await del(serverName);
+    }
 }
 
-async function del(button) {
-    const data = {
-        serverName: button.dataset.server
-    };
+async function del(serverName) {
+    const data = { serverName };
     await fetch('/api/servers/delete', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
     });
-    
-    document.getElementById('confirmation-modal').close();
-    document.getElementById(`server-${button.dataset.server}`).remove();
+
+    document.getElementById(`server-${serverName}`).remove();
     if (!document.querySelector('.server-card')) {
         window.location.reload();
     }

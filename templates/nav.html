@@ -8,13 +8,13 @@
             </button>
             <div class="nav-dropdown" id="nav-dropdown" hidden>
                 <div class="nav-dropdown-section">
-                    <span class="nav-dropdown-label" data-i18n="nav.language">Idioma</span>
+                    <span class="nav-dropdown-label" data-i18n="nav.language">{{ t('nav.language') }}</span>
                     <div class="nav-dropdown-options" id="nav-lang-options">
-                        <button class="nav-dropdown-option" data-lang="es" onclick="setLanguage('es')">
+                        <button class="nav-dropdown-option{% if lang_code == 'es' %} is-selected{% endif %}" data-lang="es" onclick="setLanguage('es')">
                             <img src="{{ url_for('static', filename='icons/check.svg') }}" alt="check">
                             Español
                         </button>
-                        <button class="nav-dropdown-option" data-lang="en" onclick="setLanguage('en')">
+                        <button class="nav-dropdown-option{% if lang_code == 'en' %} is-selected{% endif %}" data-lang="en" onclick="setLanguage('en')">
                             <img src="{{ url_for('static', filename='icons/check.svg') }}" alt="check">
                             English
                         </button>
@@ -25,7 +25,7 @@
                     <div class="nav-settings-menu">
                         <button class="nav-dropdown-option" id="nav-settings-btn" type="button" aria-expanded="false" aria-controls="nav-settings-dropdown">
                             <img src="{{ url_for('static', filename='icons/settings.svg') }}" alt="Settings">
-                            <span data-i18n="nav.settings">Ajustes</span>
+                            <span data-i18n="nav.settings">{{ t('nav.settings') }}</span>
                         </button>
                         <div class="nav-dropdown nav-settings-dropdown" id="nav-settings-dropdown" hidden>
                             <div class="nav-dropdown-section">
@@ -42,19 +42,19 @@
                     </div>
                     <a class="nav-dropdown-option" href="https://pijadmin.xenomorphyk.one">
                         <img src="{{ url_for('static', filename='icons/about.svg') }}" alt="About">
-                        <span data-i18n="nav.about">Acerca de</span>
+                        <span data-i18n="nav.about">{{ t('nav.about') }}</span>
                     </a>
                 </div>
             </div>
             <nav class="navbar-pill">
             <div class="nav-brand">
                 <span class="brand-dot" id="connection-dot" aria-hidden="true"></span>
-                <span><span data-i18n="nav.server_dashboard">Dashboard del servidor </span><span>{{server_name}}</span>
+                <span><span data-i18n="nav.server_dashboard">{{ t('nav.server_dashboard') }}</span><span>{{server_name}}</span>
             </div>
             <div class="nav-links">
-                <a class="nav-link" href="#panel-main" data-i18n="nav.server">Servidor</a>
-                <a class="nav-link" href="#panel-options" data-i18n="nav.options">Opciones</a>
-                <a class="nav-link" href="#panel-console" data-i18n="nav.console">Consola</a>
+                <a class="nav-link" href="#panel-main" data-i18n="nav.server">{{ t('nav.server') }}</a>
+                <a class="nav-link" href="#panel-options" data-i18n="nav.options">{{ t('nav.options') }}</a>
+                <a class="nav-link" href="#panel-console" data-i18n="nav.console">{{ t('nav.console') }}</a>
             </div>
             </nav>
         </div>

@@ -218,6 +218,7 @@ socket.on('server_status', (data) => {
     const status = data.status;
     const statusElement = document.getElementById('status');
 
+    console.log(status);
     if (status === 1) {
         statusElement.textContent = '● Servidor en línea';
         statusElement.style.color = '#3ba55d';
@@ -329,14 +330,12 @@ socket.on('server_ready', async (data) => {
     await delay(500);
     status.textContent = '● Servidor en línea';
     status.style.color = '#3ba55d';
-    document.getElementById('console').innerText += `\n[Dashboard] Servidor listo! (${data.time}s)`;
+    console = document.getElementById('console')
+    console.innerText += `\n[Dashboard] Servidor listo! (${data.time}s)`;
+    console.scrollTop = consoleBox.scrollHeight;
     const btn = document.getElementById('btnStart');
     btn.innerText = 'Apagar servidor';
     btn.disabled = false;
-    btn.onclick = () => {
-        modal = document.getElementById('shut-down-modal')
-        modal.showModal()
-    }
 })
 
 socket.on('console_output', (msg) => {
