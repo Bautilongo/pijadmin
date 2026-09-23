@@ -417,6 +417,10 @@ button:disabled {
     transform: none;
 }
 
+#btnStart.server-status-pending {
+    visibility: hidden;
+}
+
 #cmdInput + button {
     margin-left: 8px;
 }

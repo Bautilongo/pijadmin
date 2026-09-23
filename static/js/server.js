@@ -218,6 +218,8 @@ socket.on('server_status', (data) => {
     const status = data.status;
     const statusElement = document.getElementById('status');
 
+    button.classList.remove('server-status-pending');
+    button.removeAttribute('aria-busy');
     console.log(status);
     if (status === 1) {
         statusElement.textContent = '● Servidor en línea';

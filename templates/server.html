@@ -8,7 +8,7 @@
     <main class="main-content">
         <div class="card" id="panel-control" data-server="{{ server_name }}" data-version="{{ server['version'] }}" data-software="{{ server['software'] }}">
             <h2 data-i18n="server.control">{{ t('server.control') }}</h2>
-            <button id="btnStart" onclick="iniciar()" data-i18n="server.start">{{ t('server.start') }}</button>
+            <button id="btnStart" class="server-status-pending" onclick="iniciar()" data-i18n="server.start" aria-busy="true">{{ t('server.start') }}</button>
             <span id="status" data-i18n="server.disconnected">{{ t('server.disconnected') }}</span>
             <span id="metrics">RAM: 0 MB | CPU: 0%</span>
         </div>
