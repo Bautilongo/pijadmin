@@ -118,6 +118,16 @@
             </div>
             <footer data-i18n="server.note">{{ t('server.note') }}</footer>
         </div>
-        <style>#panel-console{display:none;}#panel-options{display:none;}</style>
+        <div class="card" id="panel-mods">
+            <header>
+                <img id="modrinth-icon" src="{{ url_for('static', filename='icons/modrinth.svg') }}" alt="mods">
+                <h2>Mods</h2>
+            </header>
+            <div id="properties-container">
+                <button class="btn btn-primary" onclick="updateProperties(this.parentNode, this)">Guardar</button>
+            </div>
+            <footer data-i18n="server.note">{{ t('server.note') }}</footer>
+        </div>
+        <style>#panel-console{display:none;}#panel-options{display:none;}#panel-mods{display:block;}</style>
     </main>
 {% endblock %}
