@@ -270,6 +270,7 @@ def api_change_version():
     try:
         stop_server({'serverName': data['serverName']})
         s.change_server_version(data['serverName'], data['newVersion'])
+        util.del_conf_java(data['serverName'])
     except ServerCreationError as e:
         print(e)
         return {'status': 'error', 'message': e.args[0]}, e.code
@@ -354,8 +355,9 @@ def handle_start(data):
         clients_emit('console_output', {'data': f'[Dashboard] Iniciando {jar_path.name}...\n'}, server_name)
 
         java_ = java.get_java(server_name)
-        if java_ == False:
-            pass
+        print(java_)
+        if java_ == True:
+            return {'status': 'error', 'message': 'Custom installation is not implemented yet'}
         if java_[1] is None:
             return {'status': 'installation_needed', 'message': f'java SDK v{java_[0]} needs to be installed', 'java_version': java_[0]}  # pedir confirmación de instalación
         if java_[1] is not None:

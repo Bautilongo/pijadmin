@@ -138,3 +138,19 @@ def write_conf_java(server, path=None, version=None, custom_installation=False):
 
     with open(conf_path, "w", encoding="utf-8") as f:
         parser.write(f)
+
+def del_conf_java(server):
+    conf_path = SERVERS_DIR / ("server." + server) / ".conf"
+    parser = ConfigParser()
+
+    if conf_path.exists():
+        parser.read(conf_path)
+
+    parser["java"] = {
+        "custom_installation": parser.get("java", "custom_installation"),
+        "path": "",
+        "version": "",
+    }
+
+    with open(conf_path, "w", encoding="utf-8") as f:
+        parser.write(f)
