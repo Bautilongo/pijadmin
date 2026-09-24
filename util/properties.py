@@ -58,6 +58,4 @@ def validate_and_map(data):
         clean_props['hardcore'] = 'true' if data['hardcore'] is True else 'false'
     if 'force-gamemode' in data:
         clean_props['force-gamemode'] = 'true' if data['force-gamemode'] is True else 'false'
-        
-
     return clean_props
